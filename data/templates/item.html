@@ -1,0 +1,45 @@
+{{template "base" .}}
+
+{{define "content"}}
+    <div class="f2 mt3">{{.Data.Item.Name}}</div>
+    <div class="f5 mt2">
+        {{.Data.Item.Description}}
+    </div>
+    <div class="f4 mt3">Status:</div>
+    {{if .Data.CanSeeStatus}}
+        <div class="w-20-ns w-100 pa3 bg-{{.Data.StatusColour}} tc">{{.Data.Item.Status.Name}}</div>
+    {{else}}
+        <div class="w-20-ns w-100 pa3 bg-near-white tc">REDACTED</div>
+    {{end}}
+
+    <div class="f4 mt3">Price: CHF {{.Data.Item.Price}}</div>
+
+    <div class="f4 mt3">Links:</div>
+    {{if .Data.Item.Links}}
+    <ul>
+        {{range .Data.Item.Links}}
+            <li><a class="link" href="{{.URL}}">{{.Text}}</a></li>
+        {{end}}
+    </ul>
+    {{end}}
+
+    <div class="flex flex-column">
+        {{if .Data.LoggedIn}}
+            <a class="f4 link w-30-ns w-100 mt2 ph2 pv1 ba red hover-white hover-bg-red" href="/user/{{.Data.Email}}/item/{{.Data.Item.ItemID}}/delete">Delete Item</a>
+        {{end}}
+        {{if .Data.CanReserve}}
+            <a class="f4 link w-30-ns w-100 mt2 ph2 pv1 ba gold hover-white hover-bg-gold" href="/user/{{.Data.Email}}/item/{{.Data.Item.ItemID}}/reserve">Reserve Item</a>
+        {{end}}
+        {{if .Data.CanUnreserve}}
+            <a class="f4 link w-30-ns w-100 mt2 ph2 pv1 ba red hover-white hover-bg-red" href="/user/{{.Data.Email}}/item/{{.Data.Item.ItemID}}/unreserve">Remove Reservation</a>
+        {{end}}
+        {{if .Data.CanReceive}}
+            <a class="f4 link w-30-ns w-100 mt2 ph2 pv1 ba green hover-white hover-bg-green" href="/user/{{.Data.Email}}/item/{{.Data.Item.ItemID}}/receive">Mark Item as received</a>
+        {{end}}
+        {{if .Data.CanUnreceive}}
+            <a class="f4 link w-30-ns w-100 mt2 ph2 pv1 ba red hover-white hover-bg-red" href="/user/{{.Data.Email}}/item/{{.Data.Item.ItemID}}/unreceive">Mark Item as not received</a>
+        {{end}}
+
+        <a class="f4 link w-30-ns w-100 mt3 ph2 pv1 ba black dim" href="/user/{{.Data.Email}}">← Back to the List</a>
+    </div>
+{{end}}

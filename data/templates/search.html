@@ -1,0 +1,23 @@
+{{template "base" .}}
+
+{{define "content"}}
+    <form method="get" action="/search" class="f4 f3-ns flex">
+        <input type="text" name="s" class="input-reset w-90 ba" value="{{.Data.Search}}">
+        <input type="submit" class="button-reset bg-black f4 pa2 white bn" value="Search">
+    </form>
+
+    {{if .Data.Results}}
+    <div class="mt4 f4 f3-ns">{{.Data.ResultString}}</div>
+    <div class="mt4 bb bt b--gray">
+        {{range .Data.Results}}
+        <a href="/user/{{.Email}}" class="link black"><div class="pa2 hover-bg-near-white">
+            <div class="f4 f3-ns">{{.Name}}</div>
+            <div class="f5 f4-ns gray">{{.Email}}</div>
+        </div></a>
+        {{end}}
+    </div>
+    {{else}}
+    <div class="mt4 f4 f3-ns">{{.Data.ResultString}}</div>
+    {{end}}
+
+{{end}}

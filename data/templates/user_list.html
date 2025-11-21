@@ -1,0 +1,70 @@
+{{template "base" .}}
+
+{{define "content"}}
+    <div class="f2">{{.Data.User.Name}}'s Wishlist:</div>
+    <div class="fl w-100 w-20-ns">
+        <div class="f4 mt4">List Filters</div>
+		<form
+			id="userlist_filters"
+			hx-target="#userlist_datatable"
+			hx-get="/ptl/userlist/{{.Data.User.Email}}"
+		>
+			<input class="f5 lh-copy ma2" type="checkbox"
+				checked
+				name="cb_show_received"
+				hx-get="/ptl/userlist/{{.Data.User.Email}}"
+				hx-include="#userlist_filters"
+				{{if not .CurrentUserEmail}}disabled{{end}}
+			><span
+				{{if .CurrentUserEmail}} class="black" {{else}} class="moon-gray" {{end}}
+			>Show Received Items</span><br>
+			<input class="f5 lh-copy ma2" type="checkbox"
+				checked
+				name="cb_show_reserved"
+				hx-get="/ptl/userlist/{{.Data.User.Email}}"
+				hx-include="#userlist_filters"
+				{{if or (not .CurrentUserEmail) .Data.ThisIsMe}}disabled{{end}}
+			><span
+				{{if or (not .CurrentUserEmail) .Data.ThisIsMe}} class="moon-gray" {{else}} class="black" {{end}}
+			>Show Reserved Items</span><br>
+		</form>
+
+        {{if .Data.ThisIsMe}}
+        <a class="f6 link dim ba ph3 pv2 ma2 mt4 db green" href="/user/{{.Data.User.Email}}/newitem">Add Item</a>
+        <a class="f6 link dim ba ph3 pv2 ma2 mt4 db gray" href="/user/{{.Data.User.Email}}/chgpassword">Change Password</a>
+        <a class="f6 link ba ph3 pv2 ma2 db gray" href="#">More User Settings (Coming Soon...)</a>
+        {{end}}
+    </div>
+    {{if not .Data.Items}}
+    <div class="fl f6 f5-ns pv7 w-100 w-80-ns bg-near-white">
+        <div class="f3 tc">No Items</div>
+    </div>
+    {{else}}
+    <table class="fl f6 f5-ns w-100 w-80-ns" cellspacing="0">
+        <thead>
+            <tr>
+                <th class="pa1 pa3-ns bb">Item Name</th>
+                <th class="pa1 pa3-ns bb">Price</th>
+				{{if $.CurrentUserEmail}}
+                <th class="pa1 pa3-ns bb">Status</th>
+				{{end}}
+            </tr>
+        </thead>
+        <tbody id="userlist_datatable">
+            {{range .Data.Items}}
+                <tr class="hover-bg-near-white" onclick="window.location='/user/{{$.Data.User.Email}}/item/{{.ItemID}}';">
+                    <td class="pa1 pa3-ns">{{.Name}}</td>
+                    <td class="pa1 pa3-ns tr">{{.Price}} CHF</td>
+					{{if $.CurrentUserEmail}}
+						{{if and $.Data.ThisIsMe (ne .Status.StatusID 3)}}
+						<td class="pa1 pa3-ns bg-near-white">REDACTED</td>
+						{{else}}
+						<td class="pa1 pa3-ns bg-{{call $.Data.GetStatusColour .Status}}">{{.Status.Name}}</td>
+						{{end}}
+					{{end}}
+                </tr>
+            {{end}}
+        </tbody>
+    </table>
+    {{end}}
+{{end}}

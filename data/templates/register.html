@@ -1,0 +1,33 @@
+{{template "base" .}}
+
+{{define "content"}}
+    <div class="f2">Register a new User:</div>
+    <form method="post" action="/register" class="ml4 f4 f3-ns">
+        <div class="mt3">
+            <label for="name-field" class="db f5">Name</label>
+            <input id="name-field" type="text" name="name" class="mv2 input-reset ba" value="{{.Data.User.Name}}">
+            {{if .Data.Error.Name}}
+                <i class="db f5 red">{{.Data.Error.Name}}</i>
+            {{end}}
+        </div>
+        <div class="mt3">
+            <label for="email-field" class="db f5">E-Mail</label>
+            <input id="email-field" type="email" name="email" class="mv2 input-reset ba" value="{{.Data.User.Email}}">
+            {{if .Data.Error.Email}}
+                <i class="db f5 red">{{.Data.Error.Email}}</i>
+            {{end}}
+        </div>
+        <div class="mt3">
+            <label for="password-field" class="db f5">Password</label>
+            <input id="password-field" type="password" name="password" class="mv2 input-reset ba">
+        </div>
+        <div class="mt3">
+            <label for="pass-conf-field" class="db f5">Confirm Password</label>
+            <input id="pass-conf-field" type="password" name="pass_conf" class="mv2 input-reset ba">
+            {{if .Data.Error.Password}}
+                <i class="db f5 red">{{.Data.Error.Password}}</i>
+            {{end}}
+        </div>
+        <input type="submit" class="button-reset bg-white dim f5 mt3 pa2 black ba b--black pointer" value="Register">
+    </form>
+{{end}}

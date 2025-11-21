@@ -1,0 +1,13 @@
+{{range .Data.Items}}
+	<tr class="hover-bg-near-white" onclick="window.location='/user/{{$.Data.User.Email}}/item/{{.ItemID}}';">
+		<td class="pa1 pa3-ns">{{.Name}}</td>
+		<td class="pa1 pa3-ns tr">{{.Price}} CHF</td>
+		{{if $.CurrentUserEmail}}
+			{{if and $.Data.ThisIsMe (ne .Status.StatusID 3)}}
+			<td class="pa1 pa3-ns bg-near-white">REDACTED</td>
+			{{else}}
+			<td class="pa1 pa3-ns bg-{{call $.Data.GetStatusColour .Status}}">{{.Status.Name}}</td>
+			{{end}}
+		{{end}}
+	</tr>
+{{end}}

@@ -1,0 +1,36 @@
+{{template "base" .}}
+
+{{define "content"}}
+    <div class="f2">Add Item:</div>
+    <form id="new_item_form" method="post" action="/user/{{.Data.User.Email}}/newitem" class="ml4 f4 f3-ns">
+        <div class="mt3">
+            <label for="name-field" class="db f5">Item Name</label>
+            <input id="name-field" type="text" name="name" class="mv2 input-reset ba" value="{{.Data.Item.Name}}">
+            {{if .Data.Error.Name}}
+                <i class="db f5 red">{{.Data.Error.Name}}</i>
+            {{end}}
+        </div>
+        <div class="mt3">
+            <label for="desc-field" class="db f5">Item Description</label>
+            <div class="f6 gray">Optional</div>
+            <textarea id="desc-field" type="text" name="desc" class="mv2 input-reset ba measure" value="{{.Data.Item.Description}}"></textarea>
+        </div>
+        <div class="mt3">
+            <label for="price-field" class="db f5">Price in CHF</label>
+            <input id="price-field" type="text" name="price" class="mv2 input-reset ba" value="{{.Data.Item.Price}}">
+            {{if .Data.Error.Price}}
+                <i class="db f5 red">{{.Data.Error.Price}}</i>
+            {{end}}
+        </div>
+        <div class="mt3">
+            <label class="db f5">Link to where this item can be found</label>
+            <div class="f6 gray">Optional</div>
+            <input type="text" name="link-text" class="mv2 input-reset ba" value="{{.Data.Item.LinkText}}" placeholder="Link Text">
+            <input type="text" name="link-url" class="mv2 input-reset ba" value="{{.Data.Item.LinkURL}}" placeholder="Link URL"><br>
+            {{if .Data.Error.Link}}
+                <i class="db f5 red">{{.Data.Error.Link}}</i>
+            {{end}}
+        </div>
+        <input type="submit" class="button-reset bg-white dim f5 mt3 pa2 black ba b--black pointer" value="Add Item">
+    </form>
+{{end}}

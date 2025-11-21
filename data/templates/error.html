@@ -1,0 +1,9 @@
+{{template "base" .}}
+
+{{define "content"}}
+    <div class="f2">{{.Data.ErrorCode}}</div>
+    <div class="f4 mv4">
+        {{.Data.ErrorDesc}}
+    </div>
+    <a class="link bg-white dim f5 mt3 pa2 black ba b--black pointer" href="/">Back to main page</a>
+{{end}}

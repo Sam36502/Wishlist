@@ -1,0 +1,9 @@
+{{template "base" .}}
+
+{{define "content"}}
+    <div class="f2">{{.Data.MainTitle}}</div>
+    <div class="f4">{{.Data.MainDescription}}</div>
+
+    <form action="{{.Data.YesURL}}" method="post"><input type="submit" class="f6 w-20-ns w-100 input-reset bg-white ba ph3 pv2 ma2 mt4 db {{.Data.YesColour}} b--{{.Data.YesColour}} hover-bg-{{.Data.YesColour}} hover-white" value="{{.Data.YesText}}"></form>
+    <a class="f6 w-20-ns w-100 link ba ph3 pv2 ma2 db {{.Data.NoColour}} b--{{.Data.NoColour}} hover-bg-{{.Data.NoColour}} hover-white tc" href="{{.Data.NoURL}}">{{.Data.NoText}}</a>
+{{end}}

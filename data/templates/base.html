@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html class="h-100" lang="en"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="initial-scale=1">
+    <title>A Basic Wishlist Program</title>
+    <link rel="stylesheet" href="/css/tachyons.min.css" type="text/css">
+	<script src="/js/htmx.min.js"></script>
+</head>
+<body class="h-100 helvetica bg-near-white">
+
+    <nav class="flex justify-between bb bg-black shadow-2">
+        <a class="link white dim no-underline flex items-center pa3 b" href="/">Wishlist Home</a>
+        <div class="flex-grow pa3 flex items-center">
+            <a class="f6 link dib white dim mr2 mr4-ns" href="/search">Search Users</a>
+			{{if .CurrentUserEmail}}
+            <a class="f6 link dib white dim mr2 mr4-ns" href="/logout">Log Out</a>
+            <a class="f6 link dib white dim mr2 mr4-ns" href="/user/{{.CurrentUserEmail}}">My List</a>
+			{{else}}
+            <a class="f6 link dib white dim mr2 mr4-ns" href="/login">Log In</a>
+            <a class="f6 link dib white dim mr2 mr4-ns" href="/register">Register</a>
+			{{end}}
+        </div>
+    </nav>
+
+    <div class="w-90 w-60-ns center ma3 mt5-ns pa4 bg-white shadow-4 cf">
+    {{template "content" .}}
+    </div>
+
+</body>
+</html>

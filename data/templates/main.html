@@ -1,0 +1,34 @@
+{{template "base" .}}
+
+{{define "content"}}
+    <div class="baskerville tc f-headline ">Wishlist</div>
+    <div class="f2">Search for users:</div>
+    <form action="/search" class="f4 f3-ns flex">
+        <input type="text" name="s" class="input-reset w-90 ba">
+        <input type="submit" class="button-reset bg-black f4 pa2 white bn" value="Search">
+    </form>
+
+    <div class="f2 mt5">Latest Information:</div>
+    {{if .Data}}
+        <div class="pa2 mt2">
+            {{range .Data}}
+                <div class="">
+                    <div class="f3">{{.Title}}</div>
+                    <div class="f5 i">{{.Version}}</div>
+                    <div class="f5 pl3 pv2">{{.Text}}</div>
+                    {{if .Changes}}
+                        <ul class="mt1">
+                            {{range .Changes}}
+                                <li>{{.}}</li>
+                            {{end}}
+                        </ul>
+                    {{end}}
+                </div>
+            {{end}}
+        </div>
+    {{else}}
+        <div class="mt3 pa3">
+            No Posts
+        </div>
+    {{end}}
+{{end}}

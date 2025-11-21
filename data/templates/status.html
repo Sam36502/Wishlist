@@ -1,0 +1,9 @@
+{{template "base" .}}
+
+{{define "content"}}
+    <div class="f2-ns f4 {{.Data.Colour}}">{{.Data.MainMessage}}</div>
+
+    <br>
+
+    <a href="{{.Data.NextPageURL}}" class="link f3-ns f4 black dim">{{.Data.NextPageMessage}} →</a>
+{{end}}
