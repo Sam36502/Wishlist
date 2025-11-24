@@ -14,12 +14,14 @@ type Template struct {
 
 type TemplateData struct {
 	CurrentUserEmail string
-	Data             interface{}
+	Data             any
 }
 
-func (t *Template) Render(w io.Writer, name string, data interface{}, c echo.Context) error {
+func (t *Template) Render(w io.Writer, name string, data any, c echo.Context) error {
 	if _, ok := t.templates[name]; !ok {
-		return NoTemplateError(name)
+		err := NoTemplateError(name)
+		LogError(err, fmt.Sprintf("Failed to render template '%s':", name))
+		return err
 	}
 
 	email := ""
@@ -28,10 +30,15 @@ func (t *Template) Render(w io.Writer, name string, data interface{}, c echo.Con
 		email = liUser.Email
 	}
 
-	return template.Must(t.templates[name], nil).Execute(w, TemplateData{
+	err = template.Must(t.templates[name], nil).Execute(w, TemplateData{
 		CurrentUserEmail: email,
 		Data:             data,
 	})
+	if err != nil {
+		LogError(err, fmt.Sprintf("Failed to render template '%s':", name))
+	}
+
+	return err
 }
 
 func LoadTemplates(e *echo.Echo) {
@@ -61,7 +68,7 @@ func (t *Template) load(name string) {
 	t.templates[name], err = template.ParseFiles("data/templates/base.html", "data/templates/"+name+".html")
 
 	if err != nil {
-		fmt.Printf("[ERROR] Failed to load template '%v':\n%v", name, err)
+		LogError(err, fmt.Sprintf("Failed to load template '%v':", name))
 	}
 }
 
@@ -70,7 +77,7 @@ func (t *Template) loadPartial(name string) {
 	t.templates[name], err = template.ParseFiles("data/templates/partial/" + name + ".html")
 
 	if err != nil {
-		fmt.Printf("[ERROR] Failed to load template '%v':\n%v", name, err)
+		LogError(err, fmt.Sprintf("Failed to load template '%v':", name))
 	}
 }
 

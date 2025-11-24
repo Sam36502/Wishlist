@@ -106,7 +106,7 @@ func RegisterUser(c echo.Context) error {
 			Email:    formUser.Email,
 		}
 
-		err = model.InsertUser(&user)
+		_, err = model.InsertUser(&user)
 		if err != nil {
 			hasError = true
 			if _, ok := err.(model.EmailExistsError); ok {

@@ -1,10 +1,11 @@
 package inf
 
 import (
-	"errors"
 	"fmt"
 	"regexp"
 	"strconv"
+	"strings"
+	"time"
 	"wishlist/src/inf/model"
 
 	"github.com/dgrijalva/jwt-go"
@@ -26,11 +27,27 @@ func IsEmailValid(e string) bool {
 	return emailRegex.MatchString(e)
 }
 
+// Gets the current date & time in a standard format for logging
+func GetTimestamp() string {
+	return time.Now().Format(time.DateTime)
+}
+
+// Write a message to the console with a timestamp
+func LogMessage(level, msg string) {
+	fmt.Printf(" %s [%s] %s\n", GetTimestamp(), strings.ToUpper(level), msg)
+}
+
+// Prints the error message for a stacked error
+func LogError(err error, msg string) {
+	err = model.StackError(err, msg)
+	LogMessage("ERROR", "An error occurred:\n"+err.Error())
+}
+
 // Gets and parses the currently logged in user and token from the cookie
 func GetLoggedInUser(c echo.Context) (model.User, model.Token, error) {
 	tokenData, err := CookieStore.Get(c.Request(), COOKIE_TOKEN_DATA)
 	if err != nil {
-		fmt.Println("[ERROR] Failed to read token cookie: ", err)
+		LogError(err, "Failed to read token cookie:")
 
 		if c.Path() != "/logout" {
 			c.Redirect(302, "/logout")
@@ -40,18 +57,18 @@ func GetLoggedInUser(c echo.Context) (model.User, model.Token, error) {
 
 	tokenInterface, exists := tokenData.Values[COOKIE_TOKEN_DATA]
 	if !exists {
-		return model.User{}, model.Token{}, errors.New("no user logged in")
+		return model.User{}, model.Token{}, model.StackError(nil, "No user currently logged in")
 	}
 
 	cookieToken, ok := tokenInterface.(model.Token)
 	if !ok {
-		fmt.Println("[ERROR] Couldn't convert cookie user. Deleting Cookie...")
+		LogError(nil, "Couldn't convert cookie user. Deleting Cookie...")
 		tokenData.Options.MaxAge = -1
 		err = tokenData.Save(c.Request(), c.Response())
 		if err != nil {
-			fmt.Println("[ERROR] Failed to delete cookie:\n ", err)
+			LogError(err, "Failed to delete cookie:")
 		}
-		return model.User{}, model.Token{}, errors.New("failed to convert cookie token")
+		return model.User{}, model.Token{}, model.StackError(nil, "Failed to convert cookie token")
 	}
 
 	// Parse email from JWT
@@ -62,24 +79,24 @@ func GetLoggedInUser(c echo.Context) (model.User, model.Token, error) {
 	}
 	token, _, err := jwtParser.ParseUnverified(cookieToken.Token, jwt.MapClaims{})
 	if err != nil {
-		return model.User{}, model.Token{}, errors.New("failed to parse JWT Claims: " + err.Error())
+		return model.User{}, model.Token{}, model.StackError(err, "failed to parse JWT Claims:")
 	}
 	jwtClaims, ok := token.Claims.(jwt.MapClaims)
 	if !ok {
-		return model.User{}, model.Token{}, errors.New("failed to convert cookie claims to token claims")
+		return model.User{}, model.Token{}, model.StackError(nil, "failed to convert cookie claims to token claims")
 	}
 	emailIfc, exists := jwtClaims["email"]
 	if !exists {
-		return model.User{}, model.Token{}, errors.New("invalid JWT Claims parsed; no 'email' field present")
+		return model.User{}, model.Token{}, model.StackError(nil, "invalid JWT Claims parsed; no 'email' field present")
 	}
 	email, ok := emailIfc.(string)
 	if !ok {
-		return model.User{}, model.Token{}, errors.New("invalid JWT Claims parsed; email is not a string")
+		return model.User{}, model.Token{}, model.StackError(nil, "invalid JWT Claims parsed; email is not a string")
 	}
 
 	user, err := model.GetUserWithEmail(email)
 	if err != nil {
-		return model.User{}, model.Token{}, errors.New("failed to retrieve logged-in user from API: " + err.Error())
+		return model.User{}, model.Token{}, model.StackError(err, "failed to retrieve logged-in user from API:")
 	}
 
 	return *user, cookieToken, nil

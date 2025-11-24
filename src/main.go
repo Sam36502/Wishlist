@@ -16,12 +16,15 @@ func main() {
 	e := echo.New()
 
 	// Initialise Infrastructure
-	err := model.ConnectDB()
+	err, db_version := model.ConnectDB()
 	if err != nil {
-		fmt.Printf("Failed to connect to the database:\n  %v", err)
+		inf.LogError(err, "Failed to connect to the database:")
 		return
 	}
 	defer model.DisconnectDB()
+
+	inf.LogMessage("info", "Successfully connected to the Database!")
+	inf.LogMessage("info", fmt.Sprintf("  Schema Version: %s", db_version))
 
 	inf.InitCookieStore()
 	inf.LoadTemplates(e)
@@ -31,7 +34,7 @@ func main() {
 	// Start the Server
 	err = e.Start(":" + os.Getenv("WISHLIST_PORT"))
 	if err != nil {
-		fmt.Printf("Server exited with a fatal error:\n  %v", err)
+		inf.LogError(err, "Server exited with a fatal error:")
 		return
 	}
 }

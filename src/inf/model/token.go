@@ -32,14 +32,14 @@ func Authenticate(email, password string) (*Token, error) {
 	// Find User details
 	usr, err := GetUserWithEmail(email)
 	if err != nil {
-		return nil, err
+		return nil, StackError(err, "Failed to authenticate")
 	}
 
 	hashedPassword := HashPassword(password)
 
 	// Check auth details are valid
 	if usr.Password != hashedPassword {
-		return nil, fmt.Errorf("Email / Password doesn't match")
+		return nil, StackError(nil, "Failed to authenticate: Invalid Email/Password")
 	}
 
 	// Hash Token
@@ -47,7 +47,7 @@ func Authenticate(email, password string) (*Token, error) {
 	tok := generateToken(email, expiry)
 	signd, err := tok.SignedString([]byte(os.Getenv(ENV_SIGNING_KEY)))
 	if err != nil {
-		return nil, InternalServerError("Failed to generate authentication token")
+		return nil, StackError(err, "Failed to generate authentication token")
 	}
 
 	return &Token{

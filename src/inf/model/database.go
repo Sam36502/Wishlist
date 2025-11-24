@@ -38,18 +38,17 @@ import (
 	_ "modernc.org/sqlite"
 )
 
-var g_database *sql.DB = nil
-var timerKillChannel = make(chan bool)
-
 var (
-	FILENAME = os.Getenv("WISHLIST_DB_FILENAME")
+	FILENAME   string  = os.Getenv("WISHLIST_DB_FILENAME")
+	g_database *sql.DB = nil
 )
 
-func ConnectDB() error {
+// Open connection to the database
+func ConnectDB() (error, string) {
 	var err error
 	g_database, err = sql.Open("sqlite", FILENAME)
 	if err != nil || g_database == nil {
-		return fmt.Errorf("Failed to open Database connection:\n  %v", err)
+		return StackError(err, "Failed to open Database connection:"), ""
 	}
 
 	EnsureSchema(g_database)
@@ -58,15 +57,13 @@ func ConnectDB() error {
 	var db_version string
 	err = row.Scan(&db_version)
 	if err != nil {
-		return fmt.Errorf("Error: Failed to read database meta info:\n  %v", err)
+		return StackError(err, "Error: Failed to read database meta info:"), ""
 	}
 
-	fmt.Printf("[  DB  ] Successfully connected to the Database!\n")
-	fmt.Printf("[  DB  ]   Schema Version: %s\n", db_version)
-
-	return nil
+	return nil, db_version
 }
 
+// Disconnect from the Database
 func DisconnectDB() error {
 	return g_database.Close()
 }
@@ -80,158 +77,6 @@ func IsDatabaseOnline() bool {
 // Converts an input password string into a hex hash string
 func HashPassword(pwd string) string {
 	return fmt.Sprintf("%x", sha512.Sum512(([]byte)(pwd)))
-}
-
-/// USER FUNCTIONS: ///
-//	GetAllUsers() -> []User, err
-//	GetUserWithID( ID ) -> User, err
-//	GetUserWithEmail( Email ) -> User, err
-//	InsertUser( User ) -> err
-//	UpdateUser( User ) -> err
-//	DeleteUser( ID ) -> err
-
-// Returns a list of all users
-func GetAllUsers() ([]*User, error) {
-	if g_database == nil {
-		return nil, fmt.Errorf("Query Failed: Database connection is invalid!")
-	}
-
-	rows, err := g_database.Query("SELECT * FROM tbl_user")
-	if err != nil {
-		return nil, fmt.Errorf("Failed to get all users:\n  %v", err)
-	}
-	defer rows.Close()
-
-	userArr := make([]*User, 0)
-	for rows.Next() {
-		parsedUser := User{}
-		err = rows.Scan(&parsedUser.ID, &parsedUser.Email, &parsedUser.Password, &parsedUser.Name)
-		if err != nil {
-			fmt.Println(" [ERROR] Parsing Failed:", err)
-			return nil, err
-		}
-		userArr = append(userArr, &parsedUser)
-	}
-
-	return userArr, nil
-}
-
-// Gets a user by their ID
-func GetUserWithID(id uint64) (*User, error) {
-	rows, err := g_database.Query("SELECT * FROM tbl_user WHERE id_user = ?", id)
-	if err != nil {
-		fmt.Println(" [ERROR] Query Failed:", err)
-		return nil, err
-	}
-	defer rows.Close()
-
-	parsedUser := User{}
-	rows.Next()
-	err = rows.Scan(&parsedUser.ID, &parsedUser.Email, &parsedUser.Password, &parsedUser.Name)
-	if err != nil {
-		fmt.Println(" [ERROR] Parsing Failed:", err)
-		return nil, err
-	}
-
-	return &parsedUser, nil
-}
-
-// Gets a user by their email
-func GetUserWithEmail(email string) (*User, error) {
-	rows, err := g_database.Query("SELECT * FROM tbl_user WHERE email = ?", email)
-	if err != nil {
-		fmt.Println(" [ERROR] Query Failed:", err)
-		return nil, err
-	}
-	defer rows.Close()
-
-	parsedUser := User{}
-	rows.Next()
-	err = rows.Scan(&parsedUser.ID, &parsedUser.Email, &parsedUser.Password, &parsedUser.Name)
-	if err != nil {
-		fmt.Println(" [ERROR] Parsing Failed:", err)
-		return nil, err
-	}
-
-	return &parsedUser, nil
-}
-
-// Adds a new user to the database
-func InsertUser(user *User) error {
-	// Check email isn't already in use
-	_, err := GetUserWithEmail(user.Email)
-	if err == nil {
-		fmt.Println(" [ERROR] Email '" + user.Email + "' already registered.")
-		return EmailExistsError(user.Email)
-	}
-
-	phash := HashPassword(user.Password)
-	_, err = g_database.Query("INSERT INTO tbl_user (email, password, name) VALUES(?, ?, ?)", user.Email, phash, user.Name)
-	if err != nil {
-		fmt.Println(" [ERROR] Query failed:", err)
-		return err
-	}
-
-	return nil
-}
-
-// Changes the details of a user
-func UpdateUser(user *User) error {
-	// Add arguments to the query if they aren't empty
-	queryStr := "UPDATE tbl_user SET "
-	argArr := make([]interface{}, 0)
-
-	noArgs := true
-	if user.Email != "" {
-		noArgs = false
-		queryStr += "email = ? ,"
-		argArr = append(argArr, user.Email)
-
-		// Check email isn't already in use
-		_, err := GetUserWithEmail(user.Email)
-		if err == nil {
-			return EmailExistsError(fmt.Sprintf("Email '%s' is already registered", user.Email))
-		}
-	}
-
-	if user.Password != "" {
-		noArgs = false
-		queryStr += "password = ? ,"
-		argArr = append(argArr, user.Password)
-	}
-
-	if user.Name != "" {
-		noArgs = false
-		queryStr += "name = ? ,"
-		argArr = append(argArr, user.Name)
-	}
-
-	if noArgs {
-		fmt.Println("[INFO] User '" + user.Email + "' tried to update their user info with no arguments.")
-		return nil
-	}
-
-	queryStr = queryStr[:len(queryStr)-1]
-	queryStr += "WHERE id_user = ?"
-	argArr = append(argArr, user.ID)
-
-	_, err := g_database.Exec(queryStr, argArr...)
-	if err != nil {
-		fmt.Println(" [ERROR] Query failed:", err)
-		return err
-	}
-
-	return nil
-}
-
-// Permanently delete a user from the database
-func DeleteUser(id uint64) error {
-	_, err := g_database.Query("DELETE FROM tbl_user WHERE id_user = ?", id)
-	if err != nil {
-		fmt.Println(" [ERROR] Query failed:", err)
-		return err
-	}
-	return nil
 }
 
 /// ITEM FUNCTIONS ///

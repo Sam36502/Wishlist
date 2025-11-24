@@ -112,10 +112,7 @@ func ChangePassword(c echo.Context) error {
 
 	// Change Password
 	if !hasError {
-		user.Email = ""
-		user.Name = ""
-		user.Password = model.HashPassword(formUser.NewPassword)
-		err := model.UpdateUser(user)
+		err := user.ChangePassword(formUser.NewPassword)
 		if err != nil {
 			fmt.Println("[ERROR] Failed to change password:\n ", err)
 			return c.Render(http.StatusOK, "status", inf.StatusPageData{

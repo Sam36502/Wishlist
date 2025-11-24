@@ -1,6 +1,37 @@
 package model
 
-import "fmt"
+import (
+	"fmt"
+	"path"
+	"runtime"
+)
+
+type ErrorStack string
+
+// Error stacker for neater logging
+func StackError(err error, msg string) error {
+	callstr := "         ???????:??  "
+	_, file, ln, ok := runtime.Caller(1) // Skip up the stack by 1 to get the calling function (not this one)
+	if ok {
+		filename := path.Base(file)
+		callstr = fmt.Sprintf("%15s:%-4d", filename, ln)
+	}
+
+	if err == nil {
+		return fmt.Errorf("%s | %s", callstr, msg)
+	}
+
+	_, is_es := err.(ErrorStack)
+	if is_es {
+		return ErrorStack(fmt.Sprintf("%s | %s\n%s", callstr, msg, err))
+	}
+
+	return ErrorStack(fmt.Sprintf("%s | %s\n%*s | %s", callstr, msg, len(callstr), "", err))
+}
+
+func (e ErrorStack) Error() string {
+	return string(e)
+}
 
 type NotAuthenticatedError string
 
@@ -18,6 +49,12 @@ type EmailExistsError string
 
 func (e EmailExistsError) Error() string {
 	return fmt.Sprintf("Request failed due to the provided email already being registered in the database:\n%v\n", string(e))
+}
+
+type ConnectionInvalidError string
+
+func (e ConnectionInvalidError) Error() string {
+	return fmt.Sprintf("Database connection is invalid: %s", string(e))
 }
 
 type InvalidCredentialsError string
