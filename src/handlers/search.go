@@ -8,10 +8,10 @@
 package handlers
 
 import (
-	"fmt"
 	"net/http"
 	"strconv"
 	"strings"
+	"wishlist/src/inf"
 	"wishlist/src/inf/model"
 
 	"github.com/labstack/echo/v4"
@@ -41,7 +41,7 @@ func PgSearch(c echo.Context) error {
 	// TODO: Implement search in DB / with proper index
 	all_users, err := model.GetAllUsers()
 	if err != nil {
-		fmt.Println("[ERROR] Failed to search users:\n ", err)
+		inf.LogError(err, "Failed to search users:")
 		return echo.ErrInternalServerError
 	}
 	var users []model.User

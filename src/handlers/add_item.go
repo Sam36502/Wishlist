@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"fmt"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -40,7 +39,7 @@ func PgNewItem(c echo.Context) error {
 		session.Options.MaxAge = -1
 		err = session.Save(c.Request(), c.Response())
 		if err != nil {
-			fmt.Println("[ERROR] Failed to delete form-data:\n ", err)
+			inf.LogError(err, "Failed to delete form-data:")
 			return echo.ErrInternalServerError
 		}
 	}
@@ -65,7 +64,7 @@ func NewItem(c echo.Context) error {
 	// Add item to context for if there's an error
 	session, err := inf.CookieStore.Get(c.Request(), inf.COOKIE_FORM_DATA)
 	if err != nil {
-		fmt.Println("[ERROR] Failed to get form-data cookie:\n ", err)
+		inf.LogError(err, "Failed to get form-data cookie:")
 		return echo.ErrInternalServerError
 	}
 	session.Values["item"] = formItem
@@ -135,7 +134,7 @@ func NewItem(c echo.Context) error {
 		})
 		if err != nil {
 			hasError = true
-			fmt.Println("[ERROR] Failed to add the item to the database:\n ", err)
+			inf.LogError(err, "Failed to add the item to the database:")
 
 			if _, ok := err.(model.PriceOutOfRangeError); ok {
 				formError.Price = "Price was out of range"
@@ -147,7 +146,7 @@ func NewItem(c echo.Context) error {
 		session.Values["error"] = formError
 		err = session.Save(c.Request(), c.Response())
 		if err != nil {
-			fmt.Println("[ERROR] Failed to save form-data:\n ", err)
+			inf.LogError(err, "Failed to save form-data:")
 			return echo.ErrInternalServerError
 		}
 		c.Redirect(http.StatusMovedPermanently, "/user/"+email+"/newitem")

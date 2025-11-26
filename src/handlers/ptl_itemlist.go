@@ -9,7 +9,6 @@
 package handlers
 
 import (
-	"fmt"
 	"net/http"
 	"wishlist/src/inf"
 	"wishlist/src/inf/model"
@@ -36,7 +35,7 @@ func PtlUserList(c echo.Context) error {
 	// TODO: Do item filtering on db-side
 	allItems, err := model.GetAllItems(user.ID)
 	if err != nil {
-		fmt.Println("[ERROR] Failed to retrieve User's items:\n ", err)
+		inf.LogError(err, "Failed to retrieve User's items:")
 		return c.Redirect(http.StatusPermanentRedirect, "/err/500.html")
 	}
 

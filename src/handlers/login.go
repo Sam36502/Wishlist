@@ -8,7 +8,6 @@
 package handlers
 
 import (
-	"fmt"
 	"net/http"
 	"wishlist/src/inf"
 	"wishlist/src/inf/model"
@@ -59,7 +58,7 @@ func LoginUser(c echo.Context) error {
 	// Add user to context for if there's an error
 	session, err := inf.CookieStore.Get(c.Request(), inf.COOKIE_FORM_DATA)
 	if err != nil {
-		fmt.Println("\n[ERROR] Failed to get form-data cookie:\n ", err)
+		inf.LogError(err, "Failed to get form-data cookie:")
 		return echo.ErrInternalServerError
 	}
 	session.Values["user"] = formUser
@@ -87,7 +86,7 @@ func LoginUser(c echo.Context) error {
 		session.Values["error"] = formError
 		err = session.Save(c.Request(), c.Response())
 		if err != nil {
-			fmt.Println("\n[ERROR] Failed to save form-data:\n ", err)
+			inf.LogError(err, "Failed to save form-data:")
 			return echo.ErrInternalServerError
 		}
 		return c.Redirect(http.StatusMovedPermanently, "/login")
@@ -96,7 +95,7 @@ func LoginUser(c echo.Context) error {
 	// Add Token to cookie
 	tokenData, err := inf.CookieStore.Get(c.Request(), inf.COOKIE_TOKEN_DATA)
 	if err != nil {
-		fmt.Println("\n[ERROR] Failed to get token cookie:\n ", err)
+		inf.LogError(err, "Failed to get token cookie:")
 		return echo.ErrInternalServerError
 	}
 	tokenData.Values[inf.COOKIE_TOKEN_DATA] = tok
@@ -108,7 +107,7 @@ func LoginUser(c echo.Context) error {
 
 	err = tokenData.Save(c.Request(), c.Response())
 	if err != nil {
-		fmt.Println("\n[ERROR] Failed to save token cookie:\n ", err)
+		inf.LogError(err, "Failed to save token cookie:")
 		return echo.ErrInternalServerError
 	}
 
@@ -135,7 +134,7 @@ func Logout(c echo.Context) error {
 
 	err = userData.Save(c.Request(), c.Response())
 	if err != nil {
-		fmt.Println("\n[ERROR] Failed to save token cookie:\n ", err)
+		inf.LogError(err, "Failed to save token cookie:")
 		return echo.ErrInternalServerError
 	}
 

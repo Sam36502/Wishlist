@@ -9,7 +9,6 @@
 package handlers
 
 import (
-	"fmt"
 	"net/http"
 	"wishlist/src/inf"
 	"wishlist/src/inf/model"
@@ -31,7 +30,7 @@ func PgUserList(c echo.Context) error {
 	}
 	all_items, err := model.GetAllItems(user.ID)
 	if err != nil {
-		fmt.Println("[ERROR] Failed to retrieve User's items:\n ", err)
+		inf.LogError(err, "Failed to retrieve User's items:")
 		return c.Redirect(http.StatusPermanentRedirect, "/err/500.html")
 	}
 	var items = make([]model.Item, len(all_items))

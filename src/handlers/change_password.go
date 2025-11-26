@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"fmt"
 	"net/http"
 	"wishlist/src/inf"
 	"wishlist/src/inf/model"
@@ -37,7 +36,7 @@ func PgChangePassword(c echo.Context) error {
 		session.Options.MaxAge = -1
 		err = session.Save(c.Request(), c.Response())
 		if err != nil {
-			fmt.Println("[ERROR] Failed to delete form-data:\n ", err)
+			inf.LogError(err, "Failed to delete form-data:")
 			return echo.ErrInternalServerError
 		}
 	}
@@ -61,7 +60,7 @@ func ChangePassword(c echo.Context) error {
 	// Add user to context for if there's an error
 	session, err := inf.CookieStore.Get(c.Request(), inf.COOKIE_FORM_DATA)
 	if err != nil {
-		fmt.Println("[ERROR] Failed to get form-data cookie:\n ", err)
+		inf.LogError(err, "Failed to get form-data cookie:")
 		return echo.ErrInternalServerError
 	}
 	session.Values["user"] = formUser
@@ -114,7 +113,7 @@ func ChangePassword(c echo.Context) error {
 	if !hasError {
 		err := user.ChangePassword(formUser.NewPassword)
 		if err != nil {
-			fmt.Println("[ERROR] Failed to change password:\n ", err)
+			inf.LogError(err, "Failed to change password:")
 			return c.Render(http.StatusOK, "status", inf.StatusPageData{
 				Colour:          "red",
 				MainMessage:     "Failed to change password",
@@ -129,7 +128,7 @@ func ChangePassword(c echo.Context) error {
 		session.Values["error"] = formError
 		err = session.Save(c.Request(), c.Response())
 		if err != nil {
-			fmt.Println("[ERROR] Failed to save form-data:\n ", err)
+			inf.LogError(err, "Failed to save form-data:")
 			return echo.ErrInternalServerError
 		}
 		c.Redirect(http.StatusMovedPermanently, "/user/"+email+"/chgpassword")
@@ -138,14 +137,14 @@ func ChangePassword(c echo.Context) error {
 	// Log user out
 	userData, err := inf.CookieStore.Get(c.Request(), inf.COOKIE_TOKEN_DATA)
 	if err != nil {
-		fmt.Println("[ERROR] Failed to get token cookie:\n ", err)
+		inf.LogError(err, "Failed to get token cookie:")
 		return echo.ErrInternalServerError
 	}
 	userData.Options.MaxAge = -1
 
 	err = userData.Save(c.Request(), c.Response())
 	if err != nil {
-		fmt.Println("[ERROR] Failed to save token cookie:\n ", err)
+		inf.LogError(err, "Failed to save token cookie:")
 		return echo.ErrInternalServerError
 	}
 

@@ -8,7 +8,6 @@
 package handlers
 
 import (
-	"fmt"
 	"net/http"
 	"wishlist/src/inf"
 	"wishlist/src/inf/model"
@@ -39,7 +38,7 @@ func PgRegister(c echo.Context) error {
 		session.Options.MaxAge = -1
 		err = session.Save(c.Request(), c.Response())
 		if err != nil {
-			fmt.Println("[ERROR] Failed to delete form-data:\n ", err)
+			inf.LogError(err, "Failed to delete form-data:")
 			return echo.ErrInternalServerError
 		}
 	}
@@ -60,7 +59,7 @@ func RegisterUser(c echo.Context) error {
 	// Add user to context for if there's an error
 	session, err := inf.CookieStore.Get(c.Request(), inf.COOKIE_FORM_DATA)
 	if err != nil {
-		fmt.Println("[ERROR] Failed to get form-data cookie:\n ", err)
+		inf.LogError(err, "Failed to get form-data cookie:")
 		return echo.ErrInternalServerError
 	}
 	session.Values["user"] = formUser
@@ -119,7 +118,7 @@ func RegisterUser(c echo.Context) error {
 		session.Values["error"] = formError
 		err = session.Save(c.Request(), c.Response())
 		if err != nil {
-			fmt.Println("[ERROR] Failed to save form-data:\n ", err)
+			inf.LogError(err, "Failed to save form-data:")
 			return echo.ErrInternalServerError
 		}
 		c.Redirect(http.StatusMovedPermanently, "/register")
