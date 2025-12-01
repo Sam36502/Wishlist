@@ -25,19 +25,19 @@
 
     <div class="flex flex-column">
         {{if .Data.LoggedIn}}
-            <a class="f4 link w-30-ns w-100 mt2 ph2 pv1 ba red hover-white hover-bg-red" href="/user/{{.Data.Email}}/item/{{.Data.Item.ItemID}}/delete">Delete Item</a>
+            <a class="f4 link w-30-ns w-100 mt2 ph2 pv1 ba red hover-white hover-bg-red" href="/user/{{.Data.Email}}/item/{{.Data.Item.ID}}/delete">Delete Item</a>
         {{end}}
         {{if .Data.CanReserve}}
-            <a class="f4 link w-30-ns w-100 mt2 ph2 pv1 ba gold hover-white hover-bg-gold" href="/user/{{.Data.Email}}/item/{{.Data.Item.ItemID}}/reserve">Reserve Item</a>
+            <a class="f4 link w-30-ns w-100 mt2 ph2 pv1 ba gold hover-white hover-bg-gold" href="/user/{{.Data.Email}}/item/{{.Data.Item.ID}}/reserve">Reserve Item</a>
         {{end}}
         {{if .Data.CanUnreserve}}
-            <a class="f4 link w-30-ns w-100 mt2 ph2 pv1 ba red hover-white hover-bg-red" href="/user/{{.Data.Email}}/item/{{.Data.Item.ItemID}}/unreserve">Remove Reservation</a>
+            <a class="f4 link w-30-ns w-100 mt2 ph2 pv1 ba red hover-white hover-bg-red" href="/user/{{.Data.Email}}/item/{{.Data.Item.ID}}/unreserve">Remove Reservation</a>
         {{end}}
         {{if .Data.CanReceive}}
-            <a class="f4 link w-30-ns w-100 mt2 ph2 pv1 ba green hover-white hover-bg-green" href="/user/{{.Data.Email}}/item/{{.Data.Item.ItemID}}/receive">Mark Item as received</a>
+            <a class="f4 link w-30-ns w-100 mt2 ph2 pv1 ba green hover-white hover-bg-green" href="/user/{{.Data.Email}}/item/{{.Data.Item.ID}}/receive">Mark Item as received</a>
         {{end}}
         {{if .Data.CanUnreceive}}
-            <a class="f4 link w-30-ns w-100 mt2 ph2 pv1 ba red hover-white hover-bg-red" href="/user/{{.Data.Email}}/item/{{.Data.Item.ItemID}}/unreceive">Mark Item as not received</a>
+            <a class="f4 link w-30-ns w-100 mt2 ph2 pv1 ba red hover-white hover-bg-red" href="/user/{{.Data.Email}}/item/{{.Data.Item.ID}}/unreceive">Mark Item as not received</a>
         {{end}}
 
         <a class="f4 link w-30-ns w-100 mt3 ph2 pv1 ba black dim" href="/user/{{.Data.Email}}">← Back to the List</a>

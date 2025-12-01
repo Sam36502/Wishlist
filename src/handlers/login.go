@@ -18,6 +18,8 @@ import (
 /// LOGIN
 
 func PgLogin(c echo.Context) error {
+	var err error
+	defer inf.RecoverPanic(c, &err)
 
 	// Check for data
 	data := new(struct {

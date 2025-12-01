@@ -9,6 +9,9 @@ import (
 )
 
 func PgItem(c echo.Context) error {
+	var err error
+	defer inf.RecoverPanic(c, &err)
+
 	email := c.Param("email")
 	if email == "" {
 		return echo.ErrNotFound
@@ -30,19 +33,24 @@ func PgItem(c echo.Context) error {
 	}
 
 	// Check if user can reserve this item
-	canReserve := loggedIn && !loggedInHere && item.Status.StatusID == 1
+	canReserve := loggedIn &&
+		!loggedInHere &&
+		item.Status.StatusID == model.STATUS_ID_AVAILABLE
 
 	// Check if user can unreserve this item
-	canUnreserve := loggedIn && item.Status.StatusID == 2 && item.ReservedByUser.Email == liUser.Email
+	canUnreserve := loggedIn &&
+		item.Status.StatusID == model.STATUS_ID_RESERVED &&
+		item.ReservedByUser != nil &&
+		item.ReservedByUser.Email == liUser.Email
 
 	// Check if user can see the status of this item
-	canSeeStatus := !loggedInHere || item.Status.StatusID == 3
+	canSeeStatus := !loggedInHere || item.Status.StatusID == model.STATUS_ID_RECEIVED
 
 	// Check if user can mark item as received
-	canReceive := loggedInHere && item.Status.StatusID != 3
+	canReceive := loggedInHere && item.Status.StatusID != model.STATUS_ID_RECEIVED
 
 	// Check if user can unreceive item
-	canUnreceive := loggedInHere && item.Status.StatusID == 3
+	canUnreceive := loggedInHere && item.Status.StatusID == model.STATUS_ID_RECEIVED
 
 	return c.Render(http.StatusOK, "item", struct {
 		Item         model.Item

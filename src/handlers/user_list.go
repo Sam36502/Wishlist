@@ -16,7 +16,8 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func PgUserList(c echo.Context) error {
+func PgUserList(c echo.Context) (err error) {
+	defer inf.RecoverPanic(c, &err)
 
 	// Get all the user's items
 	email := c.Param("email")

@@ -17,6 +17,8 @@ import (
 
 // The register page renderer
 func PgRegister(c echo.Context) error {
+	var err error
+	defer inf.RecoverPanic(c, &err)
 
 	// Check for data
 	data := new(struct {
@@ -129,6 +131,9 @@ func RegisterUser(c echo.Context) error {
 
 // The page displayed when the user successfully registers their user
 func PgRegisterSuccess(c echo.Context) error {
+	var err error
+	defer inf.RecoverPanic(c, &err)
+
 	return c.Render(http.StatusOK, "status", inf.StatusPageData{
 		Colour:          "green",
 		MainMessage:     "New user successfully registered!",

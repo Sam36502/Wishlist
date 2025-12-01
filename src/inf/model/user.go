@@ -84,7 +84,7 @@ func GetUserWithEmail(email string) (*User, error) {
 
 // Adds a new user to the database
 //
-//	Returns a reference to the newly created user (or nil if it failed)
+// Returns a reference to the newly created user (or nil if it failed)
 func InsertUser(user *User) (*User, error) {
 	if g_database == nil {
 		err := ConnectionInvalidError("No open connection")
@@ -112,6 +112,10 @@ func InsertUser(user *User) (*User, error) {
 
 	return newuser, err
 }
+
+//
+//	User Methods
+//
 
 // Permanently delete a user from the database
 func (usr *User) Delete() error {

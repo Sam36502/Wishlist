@@ -1,5 +1,5 @@
 {{range .Data.Items}}
-	<tr class="hover-bg-near-white" onclick="window.location='/user/{{$.Data.User.Email}}/item/{{.ItemID}}';">
+	<tr class="hover-bg-near-white" onclick="window.location='/user/{{$.Data.User.Email}}/item/{{.ID}}';">
 		<td class="pa1 pa3-ns">{{.Name}}</td>
 		<td class="pa1 pa3-ns tr">{{.Price}} CHF</td>
 		{{if $.CurrentUserEmail}}

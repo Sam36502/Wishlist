@@ -6,6 +6,7 @@ import (
 	"os"
 	"strings"
 	"wishlist/src/handlers"
+	"wishlist/src/inf"
 
 	"github.com/labstack/echo/v4"
 )
@@ -62,6 +63,8 @@ type Post struct {
 }
 
 func PgMain(c echo.Context) error {
+	var err error
+	defer inf.RecoverPanic(c, &err)
 
 	// Load Blog Posts from CSV
 	var posts []Post

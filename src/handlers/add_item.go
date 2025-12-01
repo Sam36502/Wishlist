@@ -11,6 +11,8 @@ import (
 )
 
 func PgNewItem(c echo.Context) error {
+	var err error
+	defer inf.RecoverPanic(c, &err)
 
 	email := c.Param("email")
 	if email == "" {
@@ -119,7 +121,7 @@ func NewItem(c echo.Context) error {
 
 	// Add item
 	if !hasError {
-		err = model.InsertItem(&model.Item{
+		_, err := model.InsertItem(&model.Item{
 			Name:        formItem.Name,
 			Description: formItem.Description,
 			Price:       float32(price), // parsed above

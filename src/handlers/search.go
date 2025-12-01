@@ -24,6 +24,8 @@ type searchResultData struct {
 }
 
 func PgSearch(c echo.Context) error {
+	var err error
+	defer inf.RecoverPanic(c, &err)
 
 	// Get Search Query
 	if !c.QueryParams().Has("s") {

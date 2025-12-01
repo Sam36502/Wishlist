@@ -4,12 +4,13 @@ import (
 	"net/http"
 	"strconv"
 	"wishlist/src/inf"
-	"wishlist/src/inf/model"
 
 	"github.com/labstack/echo/v4"
 )
 
 func PgDelItem(c echo.Context) error {
+	var err error
+	defer inf.RecoverPanic(c, &err)
 
 	email := c.Param("email")
 	if email == "" {
@@ -27,10 +28,10 @@ func PgDelItem(c echo.Context) error {
 		MainDescription: "Are you sure you want to delete this item?",
 		YesColour:       "red",
 		YesText:         "Yes, delete this item permanently",
-		YesURL:          "/user/" + email + "/item/" + strconv.FormatUint(item.ItemID, 10) + "/delete",
+		YesURL:          "/user/" + email + "/item/" + strconv.FormatUint(item.ID, 10) + "/delete",
 		NoColour:        "gray",
 		NoText:          "No, don't delete it",
-		NoURL:           "/user/" + email + "/item/" + strconv.FormatUint(item.ItemID, 10),
+		NoURL:           "/user/" + email + "/item/" + strconv.FormatUint(item.ID, 10),
 	})
 }
 
@@ -57,7 +58,7 @@ func DelItem(c echo.Context) error {
 	}
 
 	// Delete item
-	err = model.DeleteItem(item.ItemID)
+	err = item.Delete()
 	if err != nil {
 		return c.Render(http.StatusOK, "status", inf.StatusPageData{
 			Colour:          "red",

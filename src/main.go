@@ -11,7 +11,6 @@ import (
 )
 
 func main() {
-
 	// Initialise Echo Framework
 	e := echo.New()
 

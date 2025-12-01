@@ -19,7 +19,7 @@ func RedirectHTTPErrorHandler(err error, c echo.Context) {
 		code = httpError.Code
 	}
 
-	fmt.Println("---> Redirected to error page:\n", err)
+	LogError(err, "Redirected to error page:")
 
 	switch code {
 

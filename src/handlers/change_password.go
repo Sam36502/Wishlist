@@ -9,6 +9,9 @@ import (
 )
 
 func PgChangePassword(c echo.Context) error {
+	var err error
+	defer inf.RecoverPanic(c, &err)
+
 	email := c.Param("email")
 	if email == "" {
 		return echo.ErrNotFound
