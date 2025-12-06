@@ -52,11 +52,15 @@ func HashPassword(pwd string) string {
 
 // Returns a list of users with the provided substring in their email or name
 func SearchUsersByNameOrEmail(name string) ([]*User, error) {
+	if g_database == nil {
+		err := ConnectionInvalidError("No open connection")
+		return nil, StackError(err, "Failed to search users:")
+	}
+
 	wildcardName := "%" + name + "%"
 	rows, err := g_database.Query("SELECT * FROM tbl_user WHERE LOWER(email) LIKE ? OR LOWER(name) LIKE ?", wildcardName, wildcardName)
 	if err != nil {
-		fmt.Println(" [ERROR] Query Failed:", err)
-		return nil, err
+		return nil, StackError(err, "Failed to search users:")
 	}
 	defer rows.Close()
 
@@ -65,8 +69,7 @@ func SearchUsersByNameOrEmail(name string) ([]*User, error) {
 		parsedUser := User{}
 		err = rows.Scan(&parsedUser.ID, &parsedUser.Email, &parsedUser.Password, &parsedUser.Name)
 		if err != nil {
-			fmt.Println(" [ERROR] Parsing Failed:", err)
-			return nil, err
+			return nil, StackError(err, "Failed to search users:")
 		}
 		userArr = append(userArr, &parsedUser)
 	}
