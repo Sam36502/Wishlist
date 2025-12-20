@@ -4,8 +4,9 @@ import (
 	"fmt"
 	"os"
 
+	"wishlist/src/front"
 	"wishlist/src/inf"
-	"wishlist/src/inf/model"
+	"wishlist/src/model"
 
 	"github.com/labstack/echo/v4"
 )
@@ -25,8 +26,8 @@ func main() {
 	inf.LogMessage("info", "Successfully connected to the Database!")
 	inf.LogMessage("info", fmt.Sprintf("  Schema Version: %s", db_version))
 
-	inf.InitCookieStore()
-	inf.LoadTemplates(e)
+	front.InitCookieStore()
+	front.LoadTemplates(e)
 	InitRoutes(e)
 	e.HTTPErrorHandler = inf.RedirectHTTPErrorHandler
 

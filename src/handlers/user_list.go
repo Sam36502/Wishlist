@@ -10,8 +10,9 @@ package handlers
 
 import (
 	"net/http"
+	"wishlist/src/front"
 	"wishlist/src/inf"
-	"wishlist/src/inf/model"
+	"wishlist/src/model"
 
 	"github.com/labstack/echo/v4"
 )
@@ -41,7 +42,7 @@ func PgUserList(c echo.Context) (err error) {
 
 	// Check if currently logged in as this user
 	thisIsMe := false
-	liUser, _, err := inf.GetLoggedInUser(c)
+	liUser, _, err := front.GetLoggedInUser(c)
 	if err == nil {
 		thisIsMe = user.Email == liUser.Email
 	}
@@ -54,7 +55,7 @@ func PgUserList(c echo.Context) (err error) {
 	}{
 		User:            *user,
 		Items:           items,
-		GetStatusColour: inf.GetStatusColour,
+		GetStatusColour: front.GetStatusColour,
 		ThisIsMe:        thisIsMe,
 	})
 }

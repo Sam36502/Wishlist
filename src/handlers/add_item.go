@@ -4,8 +4,9 @@ import (
 	"net/http"
 	"net/url"
 	"strconv"
+	"wishlist/src/front"
 	"wishlist/src/inf"
-	"wishlist/src/inf/model"
+	"wishlist/src/model"
 
 	"github.com/labstack/echo/v4"
 )
@@ -26,7 +27,7 @@ func PgNewItem(c echo.Context) error {
 		Error inf.ItemFormError
 	})
 	data.User.Email = email
-	session, err := inf.CookieStore.Get(c.Request(), inf.COOKIE_FORM_DATA)
+	session, err := front.CookieStore.Get(c.Request(), front.COOKIE_FORM_DATA)
 	if err == nil {
 		if e := session.Values["error"]; e != nil {
 			if formErr, ok := e.(inf.ItemFormError); ok {
@@ -64,7 +65,7 @@ func NewItem(c echo.Context) error {
 	}
 
 	// Add item to context for if there's an error
-	session, err := inf.CookieStore.Get(c.Request(), inf.COOKIE_FORM_DATA)
+	session, err := front.CookieStore.Get(c.Request(), front.COOKIE_FORM_DATA)
 	if err != nil {
 		inf.LogError(err, "Failed to get form-data cookie:")
 		return echo.ErrInternalServerError
@@ -110,7 +111,7 @@ func NewItem(c echo.Context) error {
 	}
 
 	// Check if currently logged in as this user
-	liUser, _, err := inf.GetLoggedInUser(c)
+	liUser, _, err := front.GetLoggedInUser(c)
 	if err == nil {
 		if email != liUser.Email {
 			return echo.ErrForbidden
@@ -138,7 +139,7 @@ func NewItem(c echo.Context) error {
 			hasError = true
 			inf.LogError(err, "Failed to add the item to the database:")
 
-			if _, ok := err.(model.PriceOutOfRangeError); ok {
+			if _, ok := err.(inf.PriceOutOfRangeError); ok {
 				formError.Price = "Price was out of range"
 			}
 		}

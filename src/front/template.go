@@ -1,9 +1,10 @@
-package inf
+package front
 
 import (
 	"fmt"
 	"html/template"
 	"io"
+	"wishlist/src/inf"
 
 	"github.com/labstack/echo/v4"
 )
@@ -20,7 +21,7 @@ type TemplateData struct {
 func (t *Template) Render(w io.Writer, name string, data any, c echo.Context) error {
 	if _, ok := t.templates[name]; !ok {
 		err := NoTemplateError(name)
-		LogError(err, fmt.Sprintf("Failed to render template '%s':", name))
+		inf.LogError(err, fmt.Sprintf("Failed to render template '%s':", name))
 		return err
 	}
 
@@ -35,7 +36,7 @@ func (t *Template) Render(w io.Writer, name string, data any, c echo.Context) er
 		Data:             data,
 	})
 	if err != nil {
-		LogError(err, fmt.Sprintf("Failed to render template '%s':", name))
+		inf.LogError(err, fmt.Sprintf("Failed to render template '%s':", name))
 	}
 
 	return err
@@ -68,7 +69,7 @@ func (t *Template) load(name string) {
 	t.templates[name], err = template.ParseFiles("data/templates/base.html", "data/templates/"+name+".html")
 
 	if err != nil {
-		LogError(err, fmt.Sprintf("Failed to load template '%v':", name))
+		inf.LogError(err, fmt.Sprintf("Failed to load template '%v':", name))
 	}
 }
 
@@ -77,7 +78,7 @@ func (t *Template) loadPartial(name string) {
 	t.templates[name], err = template.ParseFiles("data/templates/partial/" + name + ".html")
 
 	if err != nil {
-		LogError(err, fmt.Sprintf("Failed to load template '%v':", name))
+		inf.LogError(err, fmt.Sprintf("Failed to load template '%v':", name))
 	}
 }
 

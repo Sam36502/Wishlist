@@ -1,6 +1,9 @@
 package model
 
-import "database/sql"
+import (
+	"database/sql"
+	"wishlist/src/inf"
+)
 
 type Item struct {
 	ID             uint64
@@ -28,8 +31,8 @@ const (
 // Gets all the items in the list for a user
 func GetAllItems(userID uint64) ([]*Item, error) {
 	if g_database == nil {
-		err := ConnectionInvalidError("No open connection")
-		return nil, StackError(err, "Failed to insert new user")
+		err := inf.ConnectionInvalidError("No open connection")
+		return nil, inf.StackError(err, "Failed to insert new user")
 	}
 
 	// Get All Items
@@ -42,7 +45,7 @@ func GetAllItems(userID uint64) ([]*Item, error) {
 		"JOIN tbl_user u ON i.user_id = u.id_user "+
 		"WHERE u.id_user = ? ORDER BY i.id_item", userID)
 	if err != nil {
-		return nil, StackError(err, "Query Failed:")
+		return nil, inf.StackError(err, "Query Failed:")
 	}
 	defer rows.Close()
 
@@ -65,7 +68,7 @@ func GetAllItems(userID uint64) ([]*Item, error) {
 			&parsedItem.User.Name,
 		)
 		if err != nil {
-			return nil, StackError(err, "Parsing Failed:")
+			return nil, inf.StackError(err, "Parsing Failed:")
 		}
 
 		// Get Reserved-By User if Present
@@ -74,7 +77,7 @@ func GetAllItems(userID uint64) ([]*Item, error) {
 				"id_user, email, name "+
 				"FROM tbl_user WHERE id_user = ?", reservedByID.Int64)
 			if err != nil {
-				return nil, StackError(err, "Query Failed:")
+				return nil, inf.StackError(err, "Query Failed:")
 			}
 			defer rows.Close()
 			rows.Next()
@@ -85,7 +88,7 @@ func GetAllItems(userID uint64) ([]*Item, error) {
 				&parsedItem.ReservedByUser.Name,
 			)
 			if err != nil {
-				return nil, StackError(err, "Parsing Failed:")
+				return nil, inf.StackError(err, "Parsing Failed:")
 			}
 		} else {
 			parsedItem.ReservedByUser = nil
@@ -94,7 +97,7 @@ func GetAllItems(userID uint64) ([]*Item, error) {
 		// Get Links
 		linkRows, err := g_database.Query("SELECT id_link, text, hyperlink FROM tbl_link WHERE item_id = ?", parsedItem.ID)
 		if err != nil {
-			return nil, StackError(err, "Query Failed:")
+			return nil, inf.StackError(err, "Query Failed:")
 		}
 		defer linkRows.Close()
 
@@ -107,7 +110,7 @@ func GetAllItems(userID uint64) ([]*Item, error) {
 				&parsedLink.URL,
 			)
 			if err != nil {
-				return nil, StackError(err, "Parsing Failed:")
+				return nil, inf.StackError(err, "Parsing Failed:")
 			}
 			parsedItem.Links = append(parsedItem.Links, parsedLink)
 		}
@@ -121,8 +124,8 @@ func GetAllItems(userID uint64) ([]*Item, error) {
 // Gets a single item from the database by its ID
 func GetItemWithID(id uint64) (*Item, error) {
 	if g_database == nil {
-		err := ConnectionInvalidError("No open connection")
-		return nil, StackError(err, "Failed to insert new user")
+		err := inf.ConnectionInvalidError("No open connection")
+		return nil, inf.StackError(err, "Failed to insert new user")
 	}
 
 	// Get All Items
@@ -135,7 +138,7 @@ func GetItemWithID(id uint64) (*Item, error) {
 		"JOIN tbl_user u ON i.user_id = u.id_user "+
 		"WHERE i.id_item = ?", id)
 	if err != nil {
-		return nil, StackError(err, "Query Failed:")
+		return nil, inf.StackError(err, "Query Failed:")
 	}
 	defer rows.Close()
 
@@ -157,7 +160,7 @@ func GetItemWithID(id uint64) (*Item, error) {
 		&parsedItem.User.Name,
 	)
 	if err != nil {
-		return nil, StackError(err, "Parsing Failed:")
+		return nil, inf.StackError(err, "Parsing Failed:")
 	}
 
 	// Get Reserved-By User if Present
@@ -166,7 +169,7 @@ func GetItemWithID(id uint64) (*Item, error) {
 			"id_user, email, name "+
 			"FROM tbl_user WHERE id_user = ?", reservedByID.Int64)
 		if err != nil {
-			return nil, StackError(err, "Query Failed:")
+			return nil, inf.StackError(err, "Query Failed:")
 		}
 		defer rows.Close()
 		rows.Next()
@@ -177,7 +180,7 @@ func GetItemWithID(id uint64) (*Item, error) {
 			&parsedItem.ReservedByUser.Name,
 		)
 		if err != nil {
-			return nil, StackError(err, "Parsing Failed:")
+			return nil, inf.StackError(err, "Parsing Failed:")
 		}
 	} else {
 		parsedItem.ReservedByUser = nil
@@ -186,7 +189,7 @@ func GetItemWithID(id uint64) (*Item, error) {
 	// Get Links
 	linkRows, err := g_database.Query("SELECT id_link, text, hyperlink FROM tbl_link WHERE item_id = ?", parsedItem.ID)
 	if err != nil {
-		return nil, StackError(err, "Failed to get Item Links:")
+		return nil, inf.StackError(err, "Failed to get Item Links:")
 	}
 	defer linkRows.Close()
 
@@ -199,7 +202,7 @@ func GetItemWithID(id uint64) (*Item, error) {
 			&parsedLink.URL,
 		)
 		if err != nil {
-			return nil, StackError(err, "Failed parse Item Links:")
+			return nil, inf.StackError(err, "Failed parse Item Links:")
 		}
 		parsedItem.Links = append(parsedItem.Links, parsedLink)
 	}
@@ -210,20 +213,20 @@ func GetItemWithID(id uint64) (*Item, error) {
 // Inserts an item into the database
 func InsertItem(item *Item) (*Item, error) {
 	if g_database == nil {
-		err := ConnectionInvalidError("No open connection")
-		return nil, StackError(err, "Failed to insert new item:")
+		err := inf.ConnectionInvalidError("No open connection")
+		return nil, inf.StackError(err, "Failed to insert new item:")
 	}
 
 	// Insert Item
 	res, err := g_database.Exec("INSERT INTO tbl_item (name, desc, price, status_id, user_id) VALUES (?, ?, ?, ?, ?)", item.Name, item.Description, item.Price, item.Status.StatusID, item.User.ID)
 	if err != nil {
-		return nil, StackError(err, "Query failed inserting item:")
+		return nil, inf.StackError(err, "Query failed inserting item:")
 	}
 
 	// Get previous insert ID
 	id64, err := res.LastInsertId()
 	if err != nil {
-		return nil, StackError(err, "Failed to get new item ID:")
+		return nil, inf.StackError(err, "Failed to get new item ID:")
 	}
 	id := uint64(id64)
 
@@ -231,13 +234,13 @@ func InsertItem(item *Item) (*Item, error) {
 	for _, link := range item.Links {
 		_, err = g_database.Query("INSERT INTO tbl_link (text, hyperlink, item_id) VALUES (?, ?, ?)", link.Text, link.URL, id) // Use Last insert ID as itemID
 		if err != nil {
-			return nil, StackError(err, "Query failed adding links")
+			return nil, inf.StackError(err, "Query failed adding links")
 		}
 	}
 
 	new_item, err := GetItemWithID(id)
 	if err != nil {
-		return nil, StackError(err, "Failed to verify new item was created successfully:")
+		return nil, inf.StackError(err, "Failed to verify new item was created successfully:")
 	}
 
 	*item = *new_item
@@ -247,13 +250,13 @@ func InsertItem(item *Item) (*Item, error) {
 // Changes an Item's Name
 func (itm *Item) ChangeName(name string) error {
 	if g_database == nil {
-		err := ConnectionInvalidError("No open connection")
-		return StackError(err, "Failed to update item name")
+		err := inf.ConnectionInvalidError("No open connection")
+		return inf.StackError(err, "Failed to update item name")
 	}
 
 	_, err := g_database.Exec("UPDATE tbl_item SET name = ? WHERE id_item = ?;", name, itm.ID)
 	if err != nil {
-		return StackError(err, "Failed to update item name")
+		return inf.StackError(err, "Failed to update item name")
 	}
 
 	return nil
@@ -262,13 +265,13 @@ func (itm *Item) ChangeName(name string) error {
 // Changes an Item's Description
 func (itm *Item) ChangeDescription(desc string) error {
 	if g_database == nil {
-		err := ConnectionInvalidError("No open connection")
-		return StackError(err, "Failed to update item description")
+		err := inf.ConnectionInvalidError("No open connection")
+		return inf.StackError(err, "Failed to update item description")
 	}
 
 	_, err := g_database.Exec("UPDATE tbl_item SET desc = ? WHERE id_item = ?;", desc, itm.ID)
 	if err != nil {
-		return StackError(err, "Failed to update item description:")
+		return inf.StackError(err, "Failed to update item description:")
 	}
 
 	return nil
@@ -277,13 +280,13 @@ func (itm *Item) ChangeDescription(desc string) error {
 // Changes an Item's Status
 func (itm *Item) ChangeStatus(status_id int) error {
 	if g_database == nil {
-		err := ConnectionInvalidError("No open connection")
-		return StackError(err, "Failed to update item status:")
+		err := inf.ConnectionInvalidError("No open connection")
+		return inf.StackError(err, "Failed to update item status:")
 	}
 
 	_, err := g_database.Exec("UPDATE tbl_item SET status_id = ? WHERE id_item = ?;", status_id, itm.ID)
 	if err != nil {
-		return StackError(err, "Failed to update item status:")
+		return inf.StackError(err, "Failed to update item status:")
 	}
 
 	return nil
@@ -292,13 +295,13 @@ func (itm *Item) ChangeStatus(status_id int) error {
 // Changes an Item's Price
 func (itm *Item) ChangePrice(price float32) error {
 	if g_database == nil {
-		err := ConnectionInvalidError("No open connection")
-		return StackError(err, "Failed to update item price:")
+		err := inf.ConnectionInvalidError("No open connection")
+		return inf.StackError(err, "Failed to update item price:")
 	}
 
 	_, err := g_database.Exec("UPDATE tbl_item SET price = ? WHERE id_item = ?;", int32(price*100), itm.ID)
 	if err != nil {
-		return StackError(err, "Failed to update item price:")
+		return inf.StackError(err, "Failed to update item price:")
 	}
 
 	return nil
@@ -307,19 +310,19 @@ func (itm *Item) ChangePrice(price float32) error {
 // Changes which user has reserved an item
 func (itm *Item) ChangeReservingUser(user *User) error {
 	if g_database == nil {
-		err := ConnectionInvalidError("No open connection")
-		return StackError(err, "Failed to update item reservation")
+		err := inf.ConnectionInvalidError("No open connection")
+		return inf.StackError(err, "Failed to update item reservation")
 	}
 
 	if user == nil {
 		_, err := g_database.Exec("UPDATE tbl_item SET reserved_by_user_id = NULL WHERE id_item = ?;", itm.ID)
 		if err != nil {
-			return StackError(err, "Failed to update item reservation")
+			return inf.StackError(err, "Failed to update item reservation")
 		}
 	} else {
 		_, err := g_database.Exec("UPDATE tbl_item SET reserved_by_user_id = ? WHERE id_item = ?;", user.ID, itm.ID)
 		if err != nil {
-			return StackError(err, "Failed to update item reservation")
+			return inf.StackError(err, "Failed to update item reservation")
 		}
 	}
 
@@ -329,21 +332,21 @@ func (itm *Item) ChangeReservingUser(user *User) error {
 // Change an item's links
 func (itm *Item) ChangeLinks(links []Link) error {
 	if g_database == nil {
-		err := ConnectionInvalidError("No open connection")
-		return StackError(err, "Failed to update item reservation")
+		err := inf.ConnectionInvalidError("No open connection")
+		return inf.StackError(err, "Failed to update item reservation")
 	}
 
 	// Clear all existing links
 	_, err := g_database.Exec("DELETE FROM tbl_link WHERE item_id = ?;", itm.ID)
 	if err != nil {
-		return StackError(err, "Failed to remove existing item links")
+		return inf.StackError(err, "Failed to remove existing item links")
 	}
 
 	// Insert new links
 	for _, lnk := range links {
 		_, err := g_database.Exec("INSERT INTO tbl_link (text, hyperlink, item_id) VALUES (?, ?, ?)", lnk.Text, lnk.URL, itm.ID)
 		if err != nil {
-			return StackError(err, "Failed to insert new item links")
+			return inf.StackError(err, "Failed to insert new item links")
 		}
 	}
 
@@ -353,13 +356,13 @@ func (itm *Item) ChangeLinks(links []Link) error {
 // Permanently delete an item from the database
 func (itm *Item) Delete() error {
 	if g_database == nil {
-		err := ConnectionInvalidError("No open connection")
-		return StackError(err, "Failed to insert new user")
+		err := inf.ConnectionInvalidError("No open connection")
+		return inf.StackError(err, "Failed to insert new user")
 	}
 
 	_, err := g_database.Query("DELETE FROM tbl_item WHERE id_item = ?", itm.ID)
 	if err != nil {
-		return StackError(err, "Query failed:")
+		return inf.StackError(err, "Query failed:")
 	}
 	return nil
 }

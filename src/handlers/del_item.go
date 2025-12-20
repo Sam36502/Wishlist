@@ -3,6 +3,7 @@ package handlers
 import (
 	"net/http"
 	"strconv"
+	"wishlist/src/front"
 	"wishlist/src/inf"
 
 	"github.com/labstack/echo/v4"
@@ -18,7 +19,7 @@ func PgDelItem(c echo.Context) error {
 	}
 
 	// Get item info
-	item, err := inf.GetItemFromPath(c)
+	item, err := front.GetItemFromPath(c)
 	if err != nil {
 		return err
 	}
@@ -42,13 +43,13 @@ func DelItem(c echo.Context) error {
 		return echo.ErrNotFound
 	}
 
-	item, err := inf.GetItemFromPath(c)
+	item, err := front.GetItemFromPath(c)
 	if err != nil {
 		return nil
 	}
 
 	// Check if currently logged in as this user
-	liUser, _, err := inf.GetLoggedInUser(c)
+	liUser, _, err := front.GetLoggedInUser(c)
 	if err == nil {
 		if email != liUser.Email {
 			return echo.ErrForbidden

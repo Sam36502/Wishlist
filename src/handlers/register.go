@@ -9,8 +9,9 @@ package handlers
 
 import (
 	"net/http"
+	"wishlist/src/front"
 	"wishlist/src/inf"
-	"wishlist/src/inf/model"
+	"wishlist/src/model"
 
 	"github.com/labstack/echo/v4"
 )
@@ -25,7 +26,7 @@ func PgRegister(c echo.Context) error {
 		User  inf.FormUser
 		Error inf.UserFormError
 	})
-	session, err := inf.CookieStore.Get(c.Request(), inf.COOKIE_FORM_DATA)
+	session, err := front.CookieStore.Get(c.Request(), front.COOKIE_FORM_DATA)
 	if err == nil {
 		if e := session.Values["error"]; e != nil {
 			if formErr, ok := e.(inf.UserFormError); ok {
@@ -59,7 +60,7 @@ func RegisterUser(c echo.Context) error {
 	}
 
 	// Add user to context for if there's an error
-	session, err := inf.CookieStore.Get(c.Request(), inf.COOKIE_FORM_DATA)
+	session, err := front.CookieStore.Get(c.Request(), front.COOKIE_FORM_DATA)
 	if err != nil {
 		inf.LogError(err, "Failed to get form-data cookie:")
 		return echo.ErrInternalServerError
@@ -110,7 +111,7 @@ func RegisterUser(c echo.Context) error {
 		_, err = model.InsertUser(&user)
 		if err != nil {
 			hasError = true
-			if _, ok := err.(model.EmailExistsError); ok {
+			if _, ok := err.(inf.EmailExistsError); ok {
 				formError.Email = "This Email is already in use"
 			}
 		}

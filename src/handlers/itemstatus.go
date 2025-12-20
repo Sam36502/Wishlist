@@ -3,8 +3,9 @@ package handlers
 import (
 	"net/http"
 	"strconv"
+	"wishlist/src/front"
 	"wishlist/src/inf"
-	"wishlist/src/inf/model"
+	"wishlist/src/model"
 
 	"github.com/labstack/echo/v4"
 )
@@ -18,7 +19,7 @@ func PgReserveItem(c echo.Context) error {
 		return echo.ErrNotFound
 	}
 
-	item, err := inf.GetItemFromPath(c)
+	item, err := front.GetItemFromPath(c)
 	if err != nil {
 		return echo.ErrNotFound
 	}
@@ -41,14 +42,14 @@ func ReserveItem(c echo.Context) error {
 		return echo.ErrNotFound
 	}
 
-	item, err := inf.GetItemFromPath(c)
+	item, err := front.GetItemFromPath(c)
 	if err != nil {
 		return echo.ErrNotFound
 	}
 
 	// Check if currently logged in as this user
 	// Only logged-in users other than yourself can reserve items
-	liUser, _, err := inf.GetLoggedInUser(c)
+	liUser, _, err := front.GetLoggedInUser(c)
 	if err == nil {
 		if email == liUser.Email {
 			return echo.ErrForbidden
@@ -88,7 +89,7 @@ func PgUnreserveItem(c echo.Context) error {
 		return echo.ErrNotFound
 	}
 
-	item, err := inf.GetItemFromPath(c)
+	item, err := front.GetItemFromPath(c)
 	if err != nil {
 		return echo.ErrNotFound
 	}
@@ -111,13 +112,13 @@ func UnreserveItem(c echo.Context) error {
 		return echo.ErrNotFound
 	}
 
-	item, err := inf.GetItemFromPath(c)
+	item, err := front.GetItemFromPath(c)
 	if err != nil {
 		return echo.ErrNotFound
 	}
 
 	// Check if currently logged in as the user who reserved it
-	liUser, _, err := inf.GetLoggedInUser(c)
+	liUser, _, err := front.GetLoggedInUser(c)
 	if err == nil {
 		if item.ReservedByUser.Email != liUser.Email {
 			return echo.ErrForbidden
@@ -157,7 +158,7 @@ func PgReceiveItem(c echo.Context) error {
 		return echo.ErrNotFound
 	}
 
-	item, err := inf.GetItemFromPath(c)
+	item, err := front.GetItemFromPath(c)
 	if err != nil {
 		return echo.ErrNotFound
 	}
@@ -180,13 +181,13 @@ func ReceiveItem(c echo.Context) error {
 		return echo.ErrNotFound
 	}
 
-	item, err := inf.GetItemFromPath(c)
+	item, err := front.GetItemFromPath(c)
 	if err != nil {
 		return echo.ErrNotFound
 	}
 
 	// Check if currently logged in as this user
-	liUser, _, err := inf.GetLoggedInUser(c)
+	liUser, _, err := front.GetLoggedInUser(c)
 	if err == nil {
 		if email != liUser.Email {
 			return echo.ErrForbidden
@@ -216,7 +217,7 @@ func PgUnReceiveItem(c echo.Context) error {
 		return echo.ErrNotFound
 	}
 
-	item, err := inf.GetItemFromPath(c)
+	item, err := front.GetItemFromPath(c)
 	if err != nil {
 		return echo.ErrNotFound
 	}
@@ -239,13 +240,13 @@ func UnReceiveItem(c echo.Context) error {
 		return echo.ErrNotFound
 	}
 
-	item, err := inf.GetItemFromPath(c)
+	item, err := front.GetItemFromPath(c)
 	if err != nil {
 		return echo.ErrNotFound
 	}
 
 	// Check if currently logged in as this user
-	liUser, _, err := inf.GetLoggedInUser(c)
+	liUser, _, err := front.GetLoggedInUser(c)
 	if err == nil {
 		if email != liUser.Email {
 			return echo.ErrForbidden

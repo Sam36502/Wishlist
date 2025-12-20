@@ -2,8 +2,9 @@ package handlers
 
 import (
 	"net/http"
+	"wishlist/src/front"
 	"wishlist/src/inf"
-	"wishlist/src/inf/model"
+	"wishlist/src/model"
 
 	"github.com/labstack/echo/v4"
 )
@@ -24,7 +25,7 @@ func PgChangePassword(c echo.Context) error {
 		Email string
 	})
 	data.Email = email
-	session, err := inf.CookieStore.Get(c.Request(), inf.COOKIE_FORM_DATA)
+	session, err := front.CookieStore.Get(c.Request(), front.COOKIE_FORM_DATA)
 	if err == nil {
 		if e := session.Values["error"]; e != nil {
 			if formErr, ok := e.(inf.UserFormError); ok {
@@ -61,7 +62,7 @@ func ChangePassword(c echo.Context) error {
 	}
 
 	// Add user to context for if there's an error
-	session, err := inf.CookieStore.Get(c.Request(), inf.COOKIE_FORM_DATA)
+	session, err := front.CookieStore.Get(c.Request(), front.COOKIE_FORM_DATA)
 	if err != nil {
 		inf.LogError(err, "Failed to get form-data cookie:")
 		return echo.ErrInternalServerError
@@ -138,7 +139,7 @@ func ChangePassword(c echo.Context) error {
 	}
 
 	// Log user out
-	userData, err := inf.CookieStore.Get(c.Request(), inf.COOKIE_TOKEN_DATA)
+	userData, err := front.CookieStore.Get(c.Request(), front.COOKIE_TOKEN_DATA)
 	if err != nil {
 		inf.LogError(err, "Failed to get token cookie:")
 		return echo.ErrInternalServerError

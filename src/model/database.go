@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"wishlist/src/inf"
 
 	_ "modernc.org/sqlite"
 )
@@ -41,12 +42,12 @@ func ConnectDB() (error, string) {
 	var err error
 	g_database, err = sql.Open("sqlite", DB_FILENAME)
 	if err != nil || g_database == nil {
-		return StackError(err, "Failed to open Database connection:"), ""
+		return inf.StackError(err, "Failed to open Database connection:"), ""
 	}
 
 	db_version, err := EnsureSchema(g_database)
 	if err != nil {
-		return StackError(err, "Failed to ensure schema:"), ""
+		return inf.StackError(err, "Failed to ensure schema:"), ""
 	}
 
 	return nil, db_version
@@ -69,7 +70,7 @@ func IsDatabaseOnline() bool {
 func EnsureSchema(db *sql.DB) (string, error) {
 	if db == nil {
 		err := fmt.Errorf("Database is nil")
-		return "", StackError(err, "Tried to ensure schema of invalid database connection")
+		return "", inf.StackError(err, "Tried to ensure schema of invalid database connection")
 	}
 
 	// Read the meta info table to check if the DB matches the expected schema
@@ -77,7 +78,7 @@ func EnsureSchema(db *sql.DB) (string, error) {
 	var db_version string
 	err := row.Scan(&db_version)
 	if err == nil && db_version != SCHEMA_VERSION {
-		return "", StackError(nil, fmt.Sprintf(
+		return "", inf.StackError(nil, fmt.Sprintf(
 			"Schema version doesn't match expected (expected '%s', got '%s')",
 			SCHEMA_VERSION, db_version,
 		))
@@ -88,11 +89,14 @@ func EnsureSchema(db *sql.DB) (string, error) {
 	}
 
 	// DB probably doesn't exist; create from script
-	fmt.Printf("Failed to read schema metadata; attempting to create DB from script '%s'...\n", SCHEMA_FILENAME)
+	inf.LogMessage("warning", fmt.Sprintf(
+		"Failed to read schema metadata; attempting to create DB from script '%s'...",
+		SCHEMA_FILENAME,
+	))
 
 	file_data, err := os.ReadFile(SCHEMA_FILENAME)
 	if err != nil {
-		return "", StackError(err, fmt.Sprintf("Failed to read DB Schema script '%s'", SCHEMA_FILENAME))
+		return "", inf.StackError(err, fmt.Sprintf("Failed to read DB Schema script '%s'", SCHEMA_FILENAME))
 	}
 
 	script := strings.ReplaceAll(string(file_data), "\n", "")
@@ -105,22 +109,22 @@ func EnsureSchema(db *sql.DB) (string, error) {
 		}
 
 		stmt += ";"
-		fmt.Printf("---> Executing '%s'...\n", stmt)
+		//inf.LogMessage("debug", fmt.Sprintf("---> Executing '%s'...", stmt))
 		_, err := db.Exec(stmt)
 		if err != nil {
-			return "", StackError(err, fmt.Sprintf("Failed while executing %s:%d:", SCHEMA_FILENAME, line_nr))
+			return "", inf.StackError(err, fmt.Sprintf("Failed while executing %s:%d:", SCHEMA_FILENAME, line_nr))
 		}
 	}
 
 	// Add standard info to metadata table
 	_, err = db.Exec("INSERT INTO META_INFO VALUES ('created_date', CURRENT_TIMESTAMP);")
 	if err != nil {
-		return "", StackError(err, "Failed to set metadata for schema creation")
+		return "", inf.StackError(err, "Failed to set metadata for schema creation")
 	}
 
 	db_version, err = MetaInfo_Get("schema_version")
 	if err != nil {
-		return "", StackError(err, "Failed to validate schema version metadata")
+		return "", inf.StackError(err, "Failed to validate schema version metadata")
 	}
 
 	return db_version, nil
@@ -132,12 +136,12 @@ func MetaInfo_Set(key, val string) error {
 
 	if g_database == nil {
 		err := fmt.Errorf("Database connection is not valid")
-		return StackError(err, errmsg)
+		return inf.StackError(err, errmsg)
 	}
 
 	_, err := g_database.Exec("INSERT INTO META_INFO VALUES (?, ?) ON CONFLICT DO UPDATE SET VALUE = ?;", key, val, val)
 	if err != nil {
-		StackError(err, errmsg)
+		inf.StackError(err, errmsg)
 	}
 
 	return nil
@@ -149,14 +153,14 @@ func MetaInfo_Get(key string) (string, error) {
 
 	if g_database == nil {
 		err := fmt.Errorf("Database connection is not valid")
-		return "", StackError(err, errmsg)
+		return "", inf.StackError(err, errmsg)
 	}
 
 	row := g_database.QueryRow("SELECT VALUE FROM META_INFO WHERE FIELD = ?", key)
 	var val string
 	err := row.Scan(&val)
 	if err != nil {
-		return "", StackError(err, errmsg)
+		return "", inf.StackError(err, errmsg)
 	}
 
 	return val, nil
@@ -170,14 +174,14 @@ func HashPassword(pwd string) string {
 // Returns a list of users with the provided substring in their email or name
 func SearchUsersByNameOrEmail(name string) ([]*User, error) {
 	if g_database == nil {
-		err := ConnectionInvalidError("No open connection")
-		return nil, StackError(err, "Failed to search users:")
+		err := inf.ConnectionInvalidError("No open connection")
+		return nil, inf.StackError(err, "Failed to search users:")
 	}
 
 	wildcardName := "%" + name + "%"
 	rows, err := g_database.Query("SELECT * FROM tbl_user WHERE LOWER(email) LIKE ? OR LOWER(name) LIKE ?", wildcardName, wildcardName)
 	if err != nil {
-		return nil, StackError(err, "Failed to search users:")
+		return nil, inf.StackError(err, "Failed to search users:")
 	}
 	defer rows.Close()
 
@@ -186,7 +190,7 @@ func SearchUsersByNameOrEmail(name string) ([]*User, error) {
 		parsedUser := User{}
 		err = rows.Scan(&parsedUser.ID, &parsedUser.Email, &parsedUser.Password, &parsedUser.Name)
 		if err != nil {
-			return nil, StackError(err, "Failed to search users:")
+			return nil, inf.StackError(err, "Failed to search users:")
 		}
 		userArr = append(userArr, &parsedUser)
 	}

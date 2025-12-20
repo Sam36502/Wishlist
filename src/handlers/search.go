@@ -12,7 +12,7 @@ import (
 	"strconv"
 	"strings"
 	"wishlist/src/inf"
-	"wishlist/src/inf/model"
+	"wishlist/src/model"
 
 	"github.com/labstack/echo/v4"
 )

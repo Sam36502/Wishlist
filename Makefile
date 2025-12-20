@@ -39,3 +39,4 @@ down: ## Stops the container
 	@echo "### Stopping Container... ###"
 	@-docker stop ${CONTAINER_NAME}
 	@-docker rm ${CONTAINER_NAME}
+

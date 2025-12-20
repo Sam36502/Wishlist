@@ -10,8 +10,9 @@ package handlers
 
 import (
 	"net/http"
+	"wishlist/src/front"
 	"wishlist/src/inf"
-	"wishlist/src/inf/model"
+	"wishlist/src/model"
 
 	"github.com/labstack/echo/v4"
 )
@@ -42,8 +43,8 @@ func PtlUserList(c echo.Context) error {
 	// For now: Filtering in-memory here
 	items := make([]model.Item, 0)
 	for _, item := range allItems {
-		skip := (!show_received && item.Status.StatusID == inf.STATUS_RECEIVED) ||
-			(!show_reserved && item.Status.StatusID == inf.STATUS_RESERVED)
+		skip := (!show_received && item.Status.StatusID == model.STATUS_ID_RECEIVED) ||
+			(!show_reserved && item.Status.StatusID == model.STATUS_ID_RESERVED)
 
 		if skip {
 			continue
@@ -54,7 +55,7 @@ func PtlUserList(c echo.Context) error {
 
 	// Check if currently logged in as this user
 	thisIsMe := false
-	liUser, _, err := inf.GetLoggedInUser(c)
+	liUser, _, err := front.GetLoggedInUser(c)
 	if err == nil {
 		thisIsMe = user.Email == liUser.Email
 	}
@@ -67,7 +68,7 @@ func PtlUserList(c echo.Context) error {
 	}{
 		User:            *user,
 		Items:           items,
-		GetStatusColour: inf.GetStatusColour,
+		GetStatusColour: front.GetStatusColour,
 		ThisIsMe:        thisIsMe,
 	})
 }

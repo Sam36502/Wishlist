@@ -9,8 +9,8 @@ package handlers
 
 import (
 	"net/http"
+	"wishlist/src/front"
 	"wishlist/src/inf"
-	"wishlist/src/inf/model"
 
 	"github.com/labstack/echo/v4"
 )
@@ -26,7 +26,7 @@ func PgLogin(c echo.Context) error {
 		User  inf.FormUser
 		Error inf.UserFormError
 	})
-	session, err := inf.CookieStore.Get(c.Request(), inf.COOKIE_FORM_DATA)
+	session, err := front.CookieStore.Get(c.Request(), front.COOKIE_FORM_DATA)
 	if err == nil {
 		if e := session.Values["error"]; e != nil {
 			if formErr, ok := e.(inf.UserFormError); ok {
@@ -58,7 +58,7 @@ func LoginUser(c echo.Context) error {
 	}
 
 	// Add user to context for if there's an error
-	session, err := inf.CookieStore.Get(c.Request(), inf.COOKIE_FORM_DATA)
+	session, err := front.CookieStore.Get(c.Request(), front.COOKIE_FORM_DATA)
 	if err != nil {
 		inf.LogError(err, "Failed to get form-data cookie:")
 		return echo.ErrInternalServerError
@@ -76,7 +76,7 @@ func LoginUser(c echo.Context) error {
 		formError.Password = "Password is required"
 	}
 
-	tok, err := model.Authenticate(formUser.Email, formUser.Password)
+	tok, err := front.Authenticate(formUser.Email, formUser.Password)
 	if err != nil {
 		inf.LogError(err, "Login Failed!")
 		hasError = true
@@ -95,16 +95,16 @@ func LoginUser(c echo.Context) error {
 	}
 
 	// Add Token to cookie
-	tokenData, err := inf.CookieStore.Get(c.Request(), inf.COOKIE_TOKEN_DATA)
+	tokenData, err := front.CookieStore.Get(c.Request(), front.COOKIE_TOKEN_DATA)
 	if err != nil {
 		inf.LogError(err, "Failed to get token cookie:")
 		return echo.ErrInternalServerError
 	}
-	tokenData.Values[inf.COOKIE_TOKEN_DATA] = tok
+	tokenData.Values[front.COOKIE_TOKEN_DATA] = tok
 
 	// Set cookie to only expire after a month if the "remember me" option is set
 	if formUser.StayLoggedIn == "on" {
-		tokenData.Options.MaxAge = inf.COOKIE_TIMEOUT
+		tokenData.Options.MaxAge = front.COOKIE_TIMEOUT
 	}
 
 	err = tokenData.Save(c.Request(), c.Response())
@@ -125,7 +125,7 @@ func Logout(c echo.Context) error {
 		NextPageURL:     "/",
 		NextPageMessage: "Back to main page",
 	}
-	userData, err := inf.CookieStore.Get(c.Request(), inf.COOKIE_TOKEN_DATA)
+	userData, err := front.CookieStore.Get(c.Request(), front.COOKIE_TOKEN_DATA)
 	if err != nil {
 		logout_message.MainMessage = "Your session expired and you were logged out"
 		logout_message.Colour = "red"

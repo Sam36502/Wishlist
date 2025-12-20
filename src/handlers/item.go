@@ -2,8 +2,9 @@ package handlers
 
 import (
 	"net/http"
+	"wishlist/src/front"
 	"wishlist/src/inf"
-	"wishlist/src/inf/model"
+	"wishlist/src/model"
 
 	"github.com/labstack/echo/v4"
 )
@@ -18,7 +19,7 @@ func PgItem(c echo.Context) error {
 	}
 
 	// Get Item information
-	item, err := inf.GetItemFromPath(c)
+	item, err := front.GetItemFromPath(c)
 	if err != nil {
 		return err
 	}
@@ -26,7 +27,7 @@ func PgItem(c echo.Context) error {
 	// Check if currently logged in as this user
 	loggedInHere := false
 	loggedIn := false
-	liUser, _, err := inf.GetLoggedInUser(c)
+	liUser, _, err := front.GetLoggedInUser(c)
 	if err == nil {
 		loggedIn = true
 		loggedInHere = liUser.Email == email
@@ -70,7 +71,7 @@ func PgItem(c echo.Context) error {
 		CanUnreserve: canUnreserve,
 		CanReceive:   canReceive,
 		CanUnreceive: canUnreceive,
-		StatusColour: inf.GetStatusColour(item.Status),
+		StatusColour: front.GetStatusColour(item.Status),
 		Email:        email,
 	})
 }

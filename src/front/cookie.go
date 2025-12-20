@@ -1,11 +1,18 @@
-package inf
+package front
 
 import (
 	"encoding/gob"
-	"wishlist/src/inf/model"
+	"wishlist/src/inf"
 
 	"github.com/gorilla/securecookie"
 	"github.com/gorilla/sessions"
+)
+
+// Cookie Config
+const (
+	COOKIE_TIMEOUT    = 30 * 24 * 60 * 60 // User data cookie expires after 30 days (same as API token)
+	COOKIE_FORM_DATA  = "form-data"       // Cookie name for sending error information to form pages
+	COOKIE_TOKEN_DATA = "token-data"      // Cookie name for the access token
 )
 
 var CookieStore *sessions.CookieStore
@@ -27,9 +34,9 @@ func InitCookieStore() {
 	}
 
 	// Register Session Types
-	gob.Register(UserFormError{})
-	gob.Register(FormUser{})
-	gob.Register(ItemFormError{})
-	gob.Register(FormItem{})
-	gob.Register(model.Token{})
+	gob.Register(inf.UserFormError{})
+	gob.Register(inf.FormUser{})
+	gob.Register(inf.ItemFormError{})
+	gob.Register(inf.FormItem{})
+	gob.Register(Token{})
 }
