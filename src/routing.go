@@ -1,12 +1,11 @@
 package main
 
 import (
-	"encoding/csv"
 	"net/http"
-	"os"
-	"strings"
+	"wishlist/src/front"
 	"wishlist/src/handlers"
 	"wishlist/src/inf"
+	"wishlist/src/model"
 
 	"github.com/labstack/echo/v4"
 )
@@ -55,35 +54,16 @@ func InitRoutes(e *echo.Echo) {
 
 }
 
-type Post struct {
-	Title   string
-	Version string
-	Text    string
-	Changes []string
-}
-
 func PgMain(c echo.Context) error {
 	var err error
 	defer inf.RecoverPanic(c, &err)
 
-	// Load Blog Posts from CSV
-	var posts []Post
-	f, err := os.Open("data/changelog.csv")
-	if err == nil {
-		csvReader := csv.NewReader(f)
-		records, err := csvReader.ReadAll()
-		if err == nil {
-			for _, post := range records {
-				posts = append(posts, Post{
-					Title:   post[0],
-					Version: post[1],
-					Text:    post[2],
-					Changes: strings.Split(post[3], ";"),
-				})
-			}
-		}
+	clog, err := model.GetChangelogEntries()
+	for i, e := range clog {
+		r := front.Renderable(e)
+		html, _ := front.RenderHTML(r)
+		clog[i].Rendered = &html
 	}
-	defer f.Close()
 
-	return c.Render(http.StatusOK, "main", posts)
+	return c.Render(http.StatusOK, "main", clog)
 }

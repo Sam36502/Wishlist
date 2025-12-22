@@ -1,4 +1,4 @@
-{{template "base" .}}
+{{template "base.html" .}}
 
 {{define "content"}}
     <div class="baskerville tc f-headline ">Wishlist</div>
@@ -14,15 +14,9 @@
             {{range .Data}}
                 <div class="">
                     <div class="f3">{{.Title}}</div>
+                    <div class="f5 b">{{.PublicationDate}}</div>
                     <div class="f5 i">{{.Version}}</div>
-                    <div class="f5 pl3 pv2">{{.Text}}</div>
-                    {{if .Changes}}
-                        <ul class="mt1">
-                            {{range .Changes}}
-                                <li>{{.}}</li>
-                            {{end}}
-                        </ul>
-                    {{end}}
+                    <div class="f5 pl3 pv2">{{.Rendered | raw}}</div>
                 </div>
             {{end}}
         </div>

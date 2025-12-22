@@ -31,7 +31,7 @@ func (t *Template) Render(w io.Writer, name string, data any, c echo.Context) er
 		email = liUser.Email
 	}
 
-	err = template.Must(t.templates[name], nil).Execute(w, TemplateData{
+	err = t.templates[name].ExecuteTemplate(w, name+".html", TemplateData{
 		CurrentUserEmail: email,
 		Data:             data,
 	})
@@ -66,8 +66,14 @@ func LoadTemplates(e *echo.Echo) {
 
 func (t *Template) load(name string) {
 	var err error
-	t.templates[name], err = template.ParseFiles("data/templates/base.html", "data/templates/"+name+".html")
 
+	// Add functions
+	funcs := template.FuncMap{
+		"raw": func(s string) template.HTML { return template.HTML(s) },
+	}
+
+	tmpl_name := "data/templates/" + name + ".html"
+	t.templates[name], err = template.New(tmpl_name).Funcs(funcs).ParseFiles(tmpl_name, "data/templates/base.html")
 	if err != nil {
 		inf.LogError(err, fmt.Sprintf("Failed to load template '%v':", name))
 	}

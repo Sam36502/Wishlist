@@ -14,7 +14,7 @@ import (
 const (
 	DEFAULT_DB_FILENAME     = "data/wishlist.db"
 	DEFAULT_SCHEMA_FILENAME = "data/db_schema.sql"
-	SCHEMA_VERSION          = "1.1.0"
+	SCHEMA_VERSION          = "1.1.1"
 )
 
 var (
@@ -78,10 +78,10 @@ func EnsureSchema(db *sql.DB) (string, error) {
 	var db_version string
 	err := row.Scan(&db_version)
 	if err == nil && db_version != SCHEMA_VERSION {
-		return "", inf.StackError(nil, fmt.Sprintf(
-			"Schema version doesn't match expected (expected '%s', got '%s')",
+		err = fmt.Errorf("Schema version doesn't match expected (expected '%s', got '%s')",
 			SCHEMA_VERSION, db_version,
-		))
+		)
+		return "", inf.StackError(err, "Failed schema version check:")
 	}
 
 	if db_version == SCHEMA_VERSION {

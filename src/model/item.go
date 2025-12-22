@@ -32,7 +32,7 @@ const (
 func GetAllItems(userID uint64) ([]*Item, error) {
 	if g_database == nil {
 		err := inf.ConnectionInvalidError("No open connection")
-		return nil, inf.StackError(err, "Failed to insert new user")
+		return nil, inf.StackError(err, "Failed to fetch user list")
 	}
 
 	// Get All Items
