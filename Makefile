@@ -17,7 +17,7 @@ build: ## Builds the executable for linux
 
 run: build ## Runs the server locally
 	@echo "### Starting Server Locally... ###"
-	@WISHLIST_PORT=8080 WISHLIST_DB_FILENAME=data/wishlist.db data/${EXE_LINUX}
+	@WISHLIST_PORT=8080 data/${EXE_LINUX}
 
 build-win: ## Builds the executable for windows
 	@echo "### Building Windows Executable... ###"
